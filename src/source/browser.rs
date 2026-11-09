@@ -4,7 +4,7 @@ use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
 use web_sys::{File, Response};
 
-use super::{LoadError, LoadedQuiz, LocalFuture, Origin, QuizSource, from_text};
+use super::{LoadError, LoadedQuiz, LocalFuture, Origin, QuizSource, from_text, raw_github_url};
 
 fn describe(e: JsValue) -> String {
     e.as_string()
@@ -55,7 +55,7 @@ pub struct UrlSource {
 
 impl QuizSource for UrlSource {
     fn load(&self) -> LocalFuture<Result<LoadedQuiz, LoadError>> {
-        let url = self.url.clone();
+        let url = raw_github_url(self.url.trim());
         Box::pin(async move {
             let window = web_sys::window().ok_or_else(|| LoadError::Network("no window".into()))?;
             let resp = JsFuture::from(window.fetch_with_str(&url))

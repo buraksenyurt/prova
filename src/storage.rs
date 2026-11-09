@@ -4,7 +4,8 @@
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use web_sys::Storage;
 
-use crate::domain::{Attempt, Mode};
+use crate::domain::Attempt;
+pub use crate::domain::HistoryEntry;
 
 pub const LANG: &str = "prova:lang";
 pub const THEME: &str = "prova:theme";
@@ -67,15 +68,6 @@ pub fn save_attempt(a: Option<&Attempt>) {
         Some(a) => save(ATTEMPT, a),
         None => remove(ATTEMPT),
     }
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct HistoryEntry {
-    pub finished_at_ms: f64,
-    pub mode: Mode,
-    pub correct: usize,
-    pub total: usize,
-    pub duration_ms: f64,
 }
 
 /// Newest first.

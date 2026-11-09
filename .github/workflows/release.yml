@@ -1,0 +1,45 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Tag ile Cargo.toml sürümü aynı mı?
+        run: |
+          crate_version=$(grep -m1 '^version' Cargo.toml | cut -d '"' -f2)
+          if [ "v$crate_version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME, Cargo.toml sürümü v$crate_version ile eşleşmiyor."
+            exit 1
+          fi
+      - name: Rust + wasm32 target
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - name: Trunk Setup
+        run: |
+          curl -sSL https://github.com/trunk-rs/trunk/releases/download/v0.22.0/trunk-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xz -C /usr/local/bin
+      - name: Testler
+        run: cargo test
+      - name: Release build
+        # Göreli adresler: paket herhangi bir klasörden ya da alt dizinden sunulabilir.
+        run: trunk build --release --public-url "./"
+      - name: Paketle
+        run: |
+          cd dist
+          zip -r "../prova-${GITHUB_REF_NAME}.zip" .
+      - name: Release oluştur
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "prova-${GITHUB_REF_NAME}.zip" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            --verify-tag

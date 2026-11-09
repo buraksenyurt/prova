@@ -3,7 +3,8 @@
 //! - Raw HTML in the content is shown as text, not executed: a quiz may come
 //!   from any URL, and `inner_html` must not become an XSS hole.
 //! - Relative image paths are resolved against `assets_base_url`.
-//! - `$...$` / `$$...$$` math is shown as code for now (KaTeX comes later).
+//! - `$...$` / `$$...$$` math becomes `.math` elements holding the TeX source;
+//!   `assets/enhance.js` renders them with KaTeX (the source stays as fallback).
 //! - Optionally, negative words in a stem ("değildir", "yanlıştır", "NOT" ...)
 //!   are highlighted: students miss them all the time.
 
@@ -43,10 +44,10 @@ pub fn render(text: &str, opts: RenderOptions) -> String {
         }
         Event::Html(s) | Event::InlineHtml(s) => Event::Text(s),
         Event::InlineMath(s) => {
-            Event::Html(format!("<code class=\"math\">{}</code>", escape(&s)).into())
+            Event::Html(format!("<span class=\"math math-inline\">{}</span>", escape(&s)).into())
         }
         Event::DisplayMath(s) => {
-            Event::Html(format!("<pre class=\"math\">{}</pre>", escape(&s)).into())
+            Event::Html(format!("<div class=\"math math-display\">{}</div>", escape(&s)).into())
         }
         Event::Start(Tag::Image {
             link_type,
@@ -68,6 +69,11 @@ pub fn render(text: &str, opts: RenderOptions) -> String {
     let mut out = String::with_capacity(text.len() * 3 / 2);
     html::push_html(&mut out, events);
     out
+}
+
+/// Whether rendered HTML has code blocks or math that `enhance.js` should process.
+pub fn needs_enhance(html: &str) -> bool {
+    html.contains("<code class=\"language-") || html.contains("class=\"math ")
 }
 
 fn resolve<'a>(url: CowStr<'a>, base: Option<&str>) -> CowStr<'a> {
@@ -162,8 +168,12 @@ mod tests {
     }
 
     #[test]
-    fn math_is_code() {
-        assert!(r("$a^2$").contains("<code class=\"math\">a^2</code>"));
+    fn math_elements() {
+        assert!(r("$a^2 < b$").contains("<span class=\"math math-inline\">a^2 &lt; b</span>"));
+        assert!(r("$$x$$").contains("<div class=\"math math-display\">x</div>"));
+        assert!(needs_enhance(&r("$x$")));
+        assert!(needs_enhance(&r("```rust\nfn a() {}\n```")));
+        assert!(!needs_enhance(&r("plain `code`")));
     }
 
     #[test]

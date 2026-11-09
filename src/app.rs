@@ -6,11 +6,12 @@ use leptos::task::spawn_local;
 use crate::components::{
     header::AppHeader, home::Home, intro::Intro, results::Results, runner::Runner,
 };
-use crate::domain::{Attempt, AttemptOptions, Quiz, summarize};
+use crate::convert::Warning;
+use crate::domain::{Attempt, AttemptOptions, HistoryEntry, Quiz, summarize};
 use crate::grading::{Grader, LocalGrader, Submission};
 use crate::i18n::I18n;
 use crate::source::{LoadError, LoadedQuiz, Origin, QuizSource, TextSource, UrlSource, from_text};
-use crate::storage::{self, HistoryEntry, SavedQuiz};
+use crate::storage::{self, SavedQuiz};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Screen {
@@ -27,6 +28,10 @@ pub struct Session {
     pub grader: Option<Arc<dyn Grader>>,
     pub origin: Origin,
     pub fingerprint: u64,
+    /// The quiz as JSON (also when it was converted from Markdown).
+    pub raw: String,
+    pub from_markdown: bool,
+    pub warnings: Vec<Warning>,
 }
 
 /// App-wide state, shared through context. All fields are `Copy` signals.
@@ -94,6 +99,9 @@ impl AppState {
             grader,
             origin: loaded.origin,
             fingerprint: loaded.fingerprint,
+            raw: loaded.raw,
+            from_markdown: loaded.from_markdown,
+            warnings: loaded.warnings,
         })));
         self.attempt.set(None);
         self.grade_failed.set(false);
@@ -195,13 +203,7 @@ impl AppState {
                     let s = summarize(&session.quiz, a, now);
                     storage::push_history(
                         &session.quiz.id,
-                        HistoryEntry {
-                            finished_at_ms: a.finished_at_ms.unwrap_or(now),
-                            mode: a.mode,
-                            correct: s.correct,
-                            total: s.total,
-                            duration_ms: s.duration_ms,
-                        },
+                        HistoryEntry::from_summary(a, &s, a.finished_at_ms.unwrap_or(now)),
                     );
                 }
             });

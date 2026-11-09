@@ -582,6 +582,89 @@ main.container {
     font-size: .9rem;
 }
 
+.tag {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 0 6px;
+    border-radius: 6px;
+    font-size: .75rem;
+    background: var(--surface-2);
+    color: var(--muted);
+}
+
+.warnings summary {
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.warnings ul {
+    margin: 8px 0 0;
+    padding-left: 1.2em;
+}
+
+/* ---------- progress ---------- */
+.progress-card {
+    margin-top: 24px;
+}
+
+.progress-card h3 {
+    margin-bottom: 2px;
+}
+
+.trends {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.trends li {
+    display: grid;
+    grid-template-columns: minmax(100px, 1fr) 96px 48px 52px;
+    gap: 12px;
+    align-items: center;
+    font-size: .92rem;
+}
+
+.spark {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 26px;
+    padding: 2px;
+    border-radius: 6px;
+    background: var(--surface-2);
+}
+
+.spark i {
+    flex: 1;
+    max-width: 14px;
+    border-radius: 2px;
+    background: var(--accent);
+    opacity: .45;
+}
+
+.spark i:last-child {
+    opacity: 1;
+}
+
+.delta {
+    font-size: .8rem;
+    font-weight: 700;
+    text-align: right;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.delta.up {
+    color: var(--ok);
+}
+
+.delta.down {
+    color: var(--bad);
+}
+
 /* ---------- runner ---------- */
 .run-bar {
     position: sticky;
@@ -736,11 +819,28 @@ main.container {
     font-size: inherit;
 }
 
-.md pre.math,
-.md code.math {
+/* highlight.js theme brings its own padding/background; the <pre> already has them */
+.md pre code.hljs {
+    padding: 0;
+    background: none;
+}
+
+/* TeX source until KaTeX has rendered it (and if it never does) */
+.md .math:not([data-rendered]) {
     font-family: var(--mono);
-    background: var(--accent-soft);
+    font-size: .9em;
     color: var(--accent-strong);
+}
+
+.md .math-display {
+    margin: .5em 0 1em;
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: center;
+}
+
+.md .katex {
+    font-size: 1.08em;
 }
 
 .md table {
@@ -1215,7 +1315,7 @@ mark.neg {
 
 .topic-bars li {
     display: grid;
-    grid-template-columns: minmax(110px, 200px) 1fr 48px;
+    grid-template-columns: minmax(110px, 200px) 1fr 48px 52px;
     gap: 12px;
     align-items: center;
 }
@@ -1405,7 +1505,7 @@ mark.neg {
     }
 
     .topic-bars li {
-        grid-template-columns: 1fr 48px;
+        grid-template-columns: 1fr 48px 52px;
     }
 
     .topic-bars .bar {
@@ -1415,6 +1515,11 @@ mark.neg {
 
     .history li {
         grid-template-columns: 1fr auto;
+    }
+
+    .trends li {
+        grid-template-columns: minmax(0, 1fr) 64px 44px 48px;
+        gap: 8px;
     }
 
     .q-nav .btn {

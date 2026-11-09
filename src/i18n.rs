@@ -6,6 +6,7 @@
 
 use leptos::prelude::*;
 
+use crate::convert::{ConvertError, Warning};
 use crate::dto::SchemaError;
 use crate::source::LoadError;
 use crate::storage;
@@ -133,9 +134,79 @@ impl Lang {
         String::from(d.to_locale_string(self.code(), &wasm_bindgen::JsValue::UNDEFINED))
     }
 
+    pub fn convert_error(self, e: &ConvertError) -> String {
+        match (self, e) {
+            (Lang::Tr, ConvertError::NoQuestions) => {
+                "Markdown'da soru bulunamadı. Sorular \"## Soru 1\" biçiminde başlıklarla başlamalı.".into()
+            }
+            (Lang::En, ConvertError::NoQuestions) => {
+                "No questions found. Each question needs a heading like \"## Question 1\".".into()
+            }
+            (Lang::Tr, ConvertError::NoOptions { question }) => {
+                format!("Soru {question}: en az iki şık bulunamadı (\"- A) ...\" biçiminde).")
+            }
+            (Lang::En, ConvertError::NoOptions { question }) => {
+                format!("Question {question}: needs at least two options (\"- A) ...\").")
+            }
+            (Lang::Tr, ConvertError::OptionOrder { question }) => {
+                format!("Soru {question}: şıklar A'dan başlayıp sırayla gitmeli.")
+            }
+            (Lang::En, ConvertError::OptionOrder { question }) => {
+                format!("Question {question}: options must start at A and be in order.")
+            }
+        }
+    }
+
+    pub fn convert_warning(self, w: &Warning) -> String {
+        match (self, w) {
+            (Lang::Tr, Warning::NoTitle) => "Başlık (# ...) yok; varsayılan başlık kullanıldı.".into(),
+            (Lang::En, Warning::NoTitle) => "No title (# ...); a default title was used.".into(),
+            (Lang::Tr, Warning::MissingAnswer { question }) => format!(
+                "Soru {question} için cevap yok. Cevaplar ya tüm sorularda olmalı ya hiçbirinde; cevap anahtarı yok sayıldı."
+            ),
+            (Lang::En, Warning::MissingAnswer { question }) => format!(
+                "Question {question} has no answer. Answers must cover all questions or none, so they were dropped."
+            ),
+            (Lang::Tr, Warning::AnswerNotAnOption { question, letter }) => {
+                format!("Soru {question}: cevap anahtarındaki '{letter}' şıkkı yok.")
+            }
+            (Lang::En, Warning::AnswerNotAnOption { question, letter }) => {
+                format!("Question {question}: the answer '{letter}' is not one of its options.")
+            }
+            (Lang::Tr, Warning::UnknownKeyEntry { question }) => {
+                format!("Cevap anahtarında {question}. soru var ama böyle bir soru yok.")
+            }
+            (Lang::En, Warning::UnknownKeyEntry { question }) => {
+                format!("The answer key lists question {question}, which does not exist.")
+            }
+            (Lang::Tr, Warning::IgnoredText { question }) => {
+                format!("Soru {question}: şıklardan sonraki metin yok sayıldı (açıklama için '>' ile başlayın).")
+            }
+            (Lang::En, Warning::IgnoredText { question }) => {
+                format!("Question {question}: text after the options was ignored (start explanations with '>').")
+            }
+            (Lang::Tr, Warning::RelativeImages) => {
+                "Göreli görsel yolları var ama temel adres bilinmiyor; görseller görünmeyebilir. Dosyayı bir URL'den yükleyin.".into()
+            }
+            (Lang::En, Warning::RelativeImages) => {
+                "Relative image paths but no base URL; images may not show. Load the file from a URL instead.".into()
+            }
+        }
+    }
+
+    pub fn change(self, delta: f64) -> String {
+        let n = delta.round() as i64;
+        match n {
+            0 => "±0".into(),
+            n if n > 0 => format!("▲ {n}"),
+            n => format!("▼ {}", -n),
+        }
+    }
+
     pub fn load_error(self, e: &LoadError) -> String {
         match (self, e) {
             (_, LoadError::Schema(s)) => self.schema_error(s),
+            (_, LoadError::Convert(c)) => self.convert_error(c),
             (Lang::Tr, LoadError::Read(m)) => format!("Dosya okunamadı: {m}"),
             (Lang::En, LoadError::Read(m)) => format!("Could not read the file: {m}"),
             (Lang::Tr, LoadError::Network(_)) => {
@@ -320,6 +391,13 @@ pub struct Texts {
     pub restart: &'static str,
     pub new_quiz: &'static str,
     pub perfect: &'static str,
+    pub converted_note: &'static str,
+    pub download_json: &'static str,
+    pub warnings_title: &'static str,
+    pub progress_title: &'static str,
+    pub progress_hint: &'static str,
+    pub retry_tag: &'static str,
+    pub vs_previous: &'static str,
 }
 
 const TR: Texts = Texts {
@@ -330,7 +408,7 @@ const TR: Texts = Texts {
     home_title: "Sınava hazır mısın?",
     home_lead: "Hocanın paylaştığı test dosyasını yükle, ister antrenman yap ister gerçek sınav gibi süre tutarak çöz.",
     drop_title: "Test dosyasını buraya bırak",
-    drop_hint: "ya da tıklayıp seç (.json)",
+    drop_hint: "ya da tıklayıp seç (.json veya sınav .md dosyası)",
     or: "veya",
     url_label: "Test adresi",
     url_placeholder: "https://.../exam.json",
@@ -398,6 +476,13 @@ const TR: Texts = Texts {
     restart: "Baştan çöz",
     new_quiz: "Başka test",
     perfect: "Hepsi doğru, tebrikler!",
+    converted_note: "Markdown'dan dönüştürüldü",
+    download_json: "JSON olarak indir",
+    warnings_title: "Dönüştürme uyarıları",
+    progress_title: "Konulara göre gelişim",
+    progress_hint: "Son denemelerin, eskiden yeniye. Tekrar çözümleri dahil değil.",
+    retry_tag: "tekrar",
+    vs_previous: "Önceki denemeye göre",
 };
 
 const EN: Texts = Texts {
@@ -408,7 +493,7 @@ const EN: Texts = Texts {
     home_title: "Ready for the exam?",
     home_lead: "Load the test file your instructor shared, then practice freely or solve it against the clock like the real exam.",
     drop_title: "Drop the test file here",
-    drop_hint: "or click to choose (.json)",
+    drop_hint: "or click to choose (.json or an exam .md file)",
     or: "or",
     url_label: "Test URL",
     url_placeholder: "https://.../exam.json",
@@ -476,6 +561,13 @@ const EN: Texts = Texts {
     restart: "Start over",
     new_quiz: "Another test",
     perfect: "All correct, well done!",
+    converted_note: "Converted from Markdown",
+    download_json: "Download as JSON",
+    warnings_title: "Conversion warnings",
+    progress_title: "Progress by topic",
+    progress_hint: "Your recent attempts, oldest to newest. Retries are not included.",
+    retry_tag: "retry",
+    vs_previous: "Compared to the previous attempt",
 };
 
 /// Selected language, shared through context.

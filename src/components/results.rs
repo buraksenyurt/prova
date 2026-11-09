@@ -2,8 +2,9 @@ use leptos::prelude::*;
 
 use super::question::{self, ChoiceMode};
 use crate::app::{Screen, now_ms, use_app};
-use crate::domain::{AttemptOptions, Outcome, summarize};
+use crate::domain::{AttemptOptions, Outcome, previous_full, summarize};
 use crate::i18n::use_i18n;
+use crate::storage;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Filter {
@@ -30,6 +31,14 @@ pub fn Results() -> impl IntoView {
                 .map(|a| summarize(&s1.quiz, a, a.finished_at_ms.unwrap_or_else(now_ms)))
         })
     });
+
+    // Last full attempt before this one, for per-topic change. A retry covers
+    // only some questions, so it is not compared.
+    let previous = StoredValue::new(app.attempt.with_untracked(|a| {
+        let a = a.as_ref().filter(|a| !a.retry)?;
+        let finished = a.finished_at_ms?;
+        previous_full(&storage::history(&session.quiz.id), finished).cloned()
+    }));
 
     let s2 = session.clone();
     let retry_missed = move |_| {
@@ -216,6 +225,30 @@ pub fn Results() -> impl IntoView {
                                                                 <span class="topic-score">
                                                                     {format!("{}/{}", t.correct, t.total)}
                                                                 </span>
+                                                                {
+                                                                    let change = previous
+                                                                        .with_value(|prev| {
+                                                                            prev.as_ref()?
+                                                                                .topics
+                                                                                .iter()
+                                                                                .find(|x| x.topic == t.topic)
+                                                                                .map(|x| p - x.percent())
+                                                                        });
+                                                                    view! {
+                                                                        <span
+                                                                            class="delta"
+                                                                            class:up=change.is_some_and(|c| c >= 0.5)
+                                                                            class:down=change.is_some_and(|c| c <= -0.5)
+                                                                            title=move || i18n.t().vs_previous
+                                                                        >
+                                                                            {move || {
+                                                                                change
+                                                                                    .map(|c| i18n.lang().change(c))
+                                                                                    .unwrap_or_default()
+                                                                            }}
+                                                                        </span>
+                                                                    }
+                                                                }
                                                             </li>
                                                         }
                                                     })

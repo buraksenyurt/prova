@@ -2,6 +2,8 @@
 
 Öğrencilerin sınava hazırlanırken testleri **tamamen tarayıcıda** çözebildiği, Rust + [Leptos](https://leptos.dev) (CSR) ile yazılmış bir WebAssembly uygulaması. Test dosyası ve cevaplar hiçbir sunucuya gönderilmez.
 
+**Canlı:** https://buraksenyurt.github.io/prova/
+
 ## Çalıştırma
 
 ```bash
@@ -19,10 +21,10 @@ Testler (tarayıcı gerekmez):
 cargo test
 ```
 
-## Özellikler (Faz 1)
+## Özellikler
 
-- **Yükleme:** JSON dosyasını sürükle-bırak veya seç, bir adresten yükle ya da gömülü örnek testi dene.
-- **Paylaşılabilir link:** `https://<adres>/?quiz=<json-adresi>` testi açılışta otomatik yükler. Raw GitHub veya gist adresleri CORS'a izin verdiği için doğrudan çalışır.
+- **Yükleme:** JSON test dosyasını veya [Markdown ile yazılmış bir sınavı](#markdown-ile-sınav-yazmak) sürükle-bırak veya seç, bir adresten yükle ya da gömülü örnek testi dene.
+- **Paylaşılabilir link:** `https://buraksenyurt.github.io/prova/?quiz=<adres>` testi açılışta otomatik yükler. Raw GitHub veya gist adresleri CORS'a izin verdiği için doğrudan çalışır; GitHub'daki `.../blob/...` sayfa linki de otomatik olarak raw adrese çevrilir.
 - **İki mod**
   - *Antrenman:* her cevaptan sonra doğru şık ve açıklama gösterilir, süre baskısı yoktur.
   - *Sınav simülasyonu:* geri sayım, cevap değiştirme, "sonra bak" işareti; sonuçlar en sonda. Süre dolunca test kendiliğinden biter.
@@ -31,6 +33,8 @@ cargo test
 - **Olumsuz kök vurgusu:** soru kökündeki "değildir", "yanlıştır", "söylenemez", "NOT" gibi kelimeler otomatik olarak işaretlenir.
 - **Sonuç ekranı:** skor, doğru/yanlış/boş sayıları, süre, zayıftan güçlüye konu kırılımı, filtrelenebilir gözden geçirme listesi ve **yanlış ve boşları tekrar çöz** düğmesi.
 - **Kaldığı yerden devam:** deneme her değişiklikte `localStorage`'a yazılır, sayfa yenilense de kaybolmaz. Her testin son 10 denemesi saklanır.
+- **Konulara göre gelişim:** giriş ekranında her konunun son 5 tam denemedeki başarısı küçük grafiklerle, sonuç ekranında ise önceki denemeye göre değişim (▲/▼) gösterilir. "Tekrar çöz" denemeleri bu karşılaştırmaya katılmaz.
+- **Kod renklendirme ve formüller:** kod blokları highlight.js, `$...$` / `$$...$$` formüller KaTeX ile gösterilir. Kütüphaneler repoda (`assets/vendor`) durur ve yalnızca içerikte kod ya da formül varsa yüklenir; CDN'e bağımlılık yoktur.
 - **Klavye:** `A–H` / `1–9` şık seçer, `←` / `→` gezinir, `F` işaretler.
 - TR/EN arayüz, açık/koyu tema, mobil uyumlu yerleşim.
 
@@ -73,9 +77,50 @@ cargo test
 | `answer` | Doğru şıkkın `id`'si. Ya tüm sorularda olmalı ya da hiçbirinde. |
 | `topics` | Sonuç ekranındaki konu kırılımı için. |
 
-Metin alanlarında Markdown kullanılabilir: kod blokları, tablolar, listeler, görseller, `$...$` formüller (şimdilik kod olarak gösterilir). İçerikteki ham HTML çalıştırılmaz, metin olarak gösterilir. Bilinmeyen alanlar yok sayılır.
+Metin alanlarında Markdown kullanılabilir: kod blokları, tablolar, listeler, görseller, `$...$` ve `$$...$$` formüller. İçerikteki ham HTML çalıştırılmaz, metin olarak gösterilir. Bilinmeyen alanlar yok sayılır.
 
 Dosyadaki hatalar soru kimliğiyle birlikte anlaşılır bir mesajla gösterilir (geçersiz JSON'da satır/sütun bilgisiyle).
+
+## Markdown ile sınav yazmak
+
+Sınavları JSON yerine doğrudan Markdown ile yazabilirsin. `.md` dosyası uygulamaya yüklendiğinde tarayıcıda JSON'a çevrilir; giriş ekranındaki **JSON olarak indir** düğmesiyle dönüştürülmüş hali alınabilir. Örnek: [`samples/exam-sample.md`](samples/exam-sample.md)
+
+````markdown
+# Sınav başlığı
+İsteğe bağlı açıklama.
+
+<!-- id: final-00 -->
+<!-- time: 40 -->
+
+## Soru 1
+Soru kökü: kod blokları, tablolar, görseller, "- I." öncülleri olabilir.
+
+- A) Birinci şık
+- B) İkinci şık
+
+> Açıklama: İsteğe bağlı; şıklardan sonra '>' ile.
+
+<!-- topics: RAG, Test -->
+
+## Cevap Anahtarı
+| Soru No | Doğru Cevap |
+|---|---|
+| 1 | B |
+````
+
+- Sorular `## Soru N` veya `## Question N` başlıklarıyla başlar. Şıklar `- A) ...` (ya da `- **A)** ...`) biçimindedir ve A'dan başlayıp sırayla gider.
+- Cevaplar `## Cevap Anahtarı` / `## Answer Key` tablosundan ya da soru içindeki `<!-- answer: B -->` yorumundan okunur. Ya tüm soruların cevabı olmalı ya da hiçbirinin.
+- `<!-- topics: ... -->` konu etiketleri, `<!-- lock -->` şık sırasını korur. "Hepsi", "Yalnızca I ve II" gibi şıklarda sıra zaten otomatik korunur.
+- Dosya bir URL'den yüklendiğinde göreli görsel yolları (`./images/x.png`) dosyanın klasörüne göre çözülür.
+
+Komut satırından:
+
+```bash
+cargo run --bin md2quiz -- Exam00.md -o exam00.json \
+    --assets-base-url https://raw.githubusercontent.com/<kullanıcı>/<repo>/main/
+```
+
+`md2quiz --help` diğer seçenekleri (`--id`, `--time`, `--shuffle-questions`, `--no-shuffle-options`) listeler. Çıktı yazılmadan önce uygulamanın kendi şema doğrulamasından geçirilir.
 
 ## Mimari
 
@@ -85,11 +130,17 @@ src/
 │   ├── quiz.rs       Quiz, Question, Choice; AnswerKey ayrı tutulur
 │   ├── attempt.rs    Deneme durumu: sıra, cevaplar, işaretler, süre, kurallar
 │   ├── summary.rs    Skor ve konu kırılımı
+│   ├── history.rs    Deneme geçmişi ve konu bazlı gelişim
 │   └── rng.rs        Tohumlu karıştırma
 ├── dto/          Dosya formatları (v1) → domain dönüşümü ve doğrulama
+├── convert.rs    Sınav Markdown'ı → JSON (uygulama ve md2quiz ortak kullanır)
+├── bin/md2quiz.rs  Komut satırı dönüştürücü
 ├── source/       QuizSource trait'i: dosya, URL, gömülü/saklanan metin
 ├── grading/      Grader trait'i: LocalGrader (cevap anahtarıyla, tarayıcıda)
 ├── markdown.rs   Güvenli Markdown render, görsel yolları, olumsuz kök vurgusu
+assets/
+├── enhance.js    highlight.js ve KaTeX'i ihtiyaç anında yükleyip uygular
+└── vendor/       highlight.js 11.11.1 ve KaTeX 0.16.25 (lisanslarıyla)
 ├── storage.rs    localStorage: devam eden deneme, son test, geçmiş
 ├── i18n.rs       TR/EN, eksik çeviri derleme hatası verir
 ├── app.rs        Uygulama durumu ve ekranlar arası akış
@@ -105,13 +156,25 @@ src/
 
 `answer` alanı olmayan bir dosya bugün de geçerlidir. Uygulama onu yükler ama değerlendirici olmadığı için başlatmaya izin vermez.
 
-> **Not:** Faz 1'de cevaplar JSON dosyasında açıkça durur. Uygulama antrenman amaçlı olduğu için bu bilinçli bir karardır; cevapları gizlemeye çalışmak yerine Faz 3'te değerlendirme servise taşınacak.
+> **Not:** Şimdilik cevaplar JSON dosyasında açıkça durur. Uygulama antrenman amaçlı olduğu için bu bilinçli bir karardır; cevapları gizlemeye çalışmak yerine Faz 3'te değerlendirme servise taşınacak.
 
 ## Yol haritası
 
-- **Faz 2:** kod renklendirme, KaTeX ile formüller, Exam Markdown → JSON dönüştürücü, konu bazlı ilerleme geçmişi.
+- ~~**Faz 2:** kod renklendirme, KaTeX ile formüller, Exam Markdown → JSON dönüştürücü, konu bazlı ilerleme geçmişi.~~
 - **Faz 3:** `ApiSource` + `RemoteGrader`, servis tarafı, öğrenci kimliği ve sonuçların toplanması.
 
 ## Yayınlama
 
 `main` dalına yapılan her push'ta GitHub Actions testleri çalıştırır ve uygulamayı GitHub Pages'e yayınlar ([`.github/workflows/deploy.yml`](.github/workflows/deploy.yml)). İlk seferde repo ayarlarından **Settings → Pages → Source: GitHub Actions** seçilmelidir.
+
+### Sürüm çıkarma
+
+`v*` biçiminde bir tag push'landığında [`.github/workflows/release.yml`](.github/workflows/release.yml) testleri çalıştırır, uygulamayı derler, `dist` klasörünü `prova-<tag>.zip` olarak paketler ve sürüm notları commit'lerden üretilen bir GitHub Release oluşturur. Paket göreli adreslerle derlendiği için herhangi bir statik sunucuda, alt dizinde de çalışır.
+
+Tag, `Cargo.toml`'daki sürümle aynı olmalıdır; değilse workflow durur.
+
+```bash
+# Cargo.toml: version = "0.1.0"
+git tag -s v0.1.0 -m "Faz 1"
+git push origin v0.1.0
+```

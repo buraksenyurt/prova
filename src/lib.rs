@@ -1,5 +1,6 @@
 pub mod app;
 pub mod components;
+pub mod convert;
 pub mod domain;
 pub mod dto;
 pub mod grading;

@@ -1,11 +1,13 @@
 //! Pure domain model: no browser APIs, fully testable with `cargo test`.
 
 pub mod attempt;
+pub mod history;
 pub mod quiz;
 pub mod rng;
 pub mod summary;
 
 pub use attempt::{Attempt, AttemptOptions, Mode, Outcome, Slot};
+pub use history::{HistoryEntry, TopicResult, TopicTrend, previous_full, topic_trends};
 pub use quiz::{
     AnswerKey, Choice, ChoiceId, KeyEntry, Question, QuestionId, Quiz, QuizSettings, Verdict,
 };

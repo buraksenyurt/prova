@@ -1,8 +1,8 @@
 use leptos::prelude::*;
 
-use super::md;
+use super::{download_text, md};
 use crate::app::{Screen, now_ms, use_app};
-use crate::domain::{AttemptOptions, Mode};
+use crate::domain::{AttemptOptions, Mode, topic_trends};
 use crate::i18n::use_i18n;
 use crate::markdown::RenderOptions;
 use crate::storage;
@@ -50,6 +50,20 @@ pub fn Intro() -> impl IntoView {
         )
     });
     let origin = session.origin.label();
+    let trends = topic_trends(&history, 5);
+    let show_progress = trends.iter().any(|t| t.points.len() >= 2);
+    let warnings = session.warnings.clone();
+
+    let download = {
+        let session = session.clone();
+        move |_| {
+            download_text(
+                &format!("{}.json", session.quiz.id),
+                &session.raw,
+                "application/json",
+            )
+        }
+    };
 
     let mode_card = move |m: Mode| {
         let (title, desc, icon) = match m {
@@ -96,7 +110,33 @@ pub fn Intro() -> impl IntoView {
                     <span class="pill subtle" title=move || i18n.t().source>
                         {origin}
                     </span>
+                    {session
+                        .from_markdown
+                        .then(|| {
+                            view! {
+                                <span class="pill subtle">{move || i18n.t().converted_note}</span>
+                                <button class="btn small" on:click=download.clone()>
+                                    "⤓ "
+                                    {move || i18n.t().download_json}
+                                </button>
+                            }
+                        })}
                 </div>
+                {(!warnings.is_empty())
+                    .then(|| {
+                        let count = warnings.len();
+                        view! {
+                            <details class="alert warn warnings">
+                                <summary>{move || i18n.t().warnings_title} " (" {count} ")"</summary>
+                                <ul>
+                                    {warnings
+                                        .into_iter()
+                                        .map(|w| view! { <li>{move || i18n.lang().convert_warning(&w)}</li> })
+                                        .collect_view()}
+                                </ul>
+                            </details>
+                        }
+                    })}
                 {(!topics.is_empty())
                     .then(|| {
                         view! {
@@ -158,6 +198,51 @@ pub fn Intro() -> impl IntoView {
                 " →"
             </button>
 
+            {show_progress
+                .then(|| {
+                    view! {
+                        <div class="card progress-card">
+                            <h3>{move || i18n.t().progress_title}</h3>
+                            <p class="muted small">{move || i18n.t().progress_hint}</p>
+                            <ul class="trends">
+                                {trends
+                                    .into_iter()
+                                    .map(|t| {
+                                        let latest = t.latest();
+                                        let change = t.change;
+                                        let bars = t
+                                            .points
+                                            .iter()
+                                            .map(|p| {
+                                                view! {
+                                                    <i
+                                                        style:height=format!("{:.0}%", p.max(4.0))
+                                                        title=format!("{p:.0}")
+                                                    ></i>
+                                                }
+                                            })
+                                            .collect_view();
+                                        view! {
+                                            <li>
+                                                <span class="topic-name">{t.topic}</span>
+                                                <span class="spark" aria-hidden="true">{bars}</span>
+                                                <strong>{move || i18n.lang().percent(latest)}</strong>
+                                                <span
+                                                    class="delta"
+                                                    class:up=change.is_some_and(|c| c >= 0.5)
+                                                    class:down=change.is_some_and(|c| c <= -0.5)
+                                                >
+                                                    {move || change.map(|c| i18n.lang().change(c)).unwrap_or_default()}
+                                                </span>
+                                            </li>
+                                        }
+                                    })
+                                    .collect_view()}
+                            </ul>
+                        </div>
+                    }
+                })}
+
             {(!history.is_empty())
                 .then(|| {
                     view! {
@@ -182,6 +267,13 @@ pub fn Intro() -> impl IntoView {
                                                         Mode::Practice => i18n.t().mode_practice,
                                                         Mode::Exam => i18n.t().mode_exam,
                                                     }}
+                                                    {h
+                                                        .retry
+                                                        .then(|| {
+                                                            view! {
+                                                                <span class="tag">{move || i18n.t().retry_tag}</span>
+                                                            }
+                                                        })}
                                                 </span>
                                                 <span>{move || i18n.lang().ratio(h.correct, h.total)}</span>
                                                 <strong>{move || i18n.lang().percent(pct)}</strong>

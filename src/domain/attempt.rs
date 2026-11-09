@@ -43,6 +43,9 @@ pub struct Attempt {
     pub started_at_ms: f64,
     pub deadline_ms: Option<f64>,
     pub finished_at_ms: Option<f64>,
+    /// Built from a subset ("retry wrong and empty").
+    #[serde(default)]
+    pub retry: bool,
 }
 
 pub struct AttemptOptions {
@@ -60,6 +63,7 @@ pub struct AttemptOptions {
 impl Attempt {
     pub fn new(quiz: &Quiz, fingerprint: u64, opts: AttemptOptions) -> Self {
         let mut rng = Rng::new(opts.seed);
+        let retry = opts.subset.is_some();
         let mut order: Vec<usize> = opts
             .subset
             .unwrap_or_else(|| (0..quiz.questions.len()).collect());
@@ -100,6 +104,7 @@ impl Attempt {
             started_at_ms: opts.now_ms,
             deadline_ms,
             finished_at_ms: None,
+            retry,
         }
     }
 

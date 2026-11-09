@@ -3,7 +3,7 @@ name = "prova"
 description = "Students practice tests right in the browser. Leptos (CSR) + WASM."
 authors = ["BSŞ"]
 license = "MIT"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]
@@ -25,6 +25,7 @@ web-sys = { version = "0.3", features = [
     "MouseEvent",
     "File",
     "FileList",
+    "HtmlElement",
     "HtmlInputElement",
     "KeyboardEvent",
     "Location",

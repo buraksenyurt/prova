@@ -155,7 +155,7 @@ fn FileDrop(on_file: Callback<File>) -> impl IntoView {
             on:dragleave=move |_| dragging.set(false)
             on:drop=on_drop
         >
-            <input type="file" accept=".json,application/json" on:change=on_change />
+            <input type="file" accept=".json,.md,.markdown,application/json,text/markdown" on:change=on_change />
             <span class="drop-icon" aria-hidden="true">"⇪"</span>
             <strong>{move || i18n.t().drop_title}</strong>
             <span class="muted">{move || i18n.t().drop_hint}</span>
