@@ -5,7 +5,8 @@ use web_sys::{DragEvent, File, HtmlInputElement};
 use crate::app::{sample_source, use_app};
 use crate::domain::Attempt;
 use crate::i18n::use_i18n;
-use crate::source::{FileSource, UrlSource};
+use crate::source::catalog::CATALOG_URL;
+use crate::source::{CatalogSource, FileSource, UrlSource};
 use crate::storage::{self, SavedQuiz};
 
 /// Unfinished attempt saved in the browser, together with its quiz.
@@ -73,6 +74,9 @@ pub fn Home() -> impl IntoView {
                     })
             }}
 
+            <CatalogList />
+
+            <h2 class="section-title">{move || i18n.t().own_file_title}</h2>
             <div class="card loader-card" class:busy=move || app.loading.get()>
                 <FileDrop on_file />
                 <div class="divider">
@@ -160,5 +164,64 @@ fn FileDrop(on_file: Callback<File>) -> impl IntoView {
             <strong>{move || i18n.t().drop_title}</strong>
             <span class="muted">{move || i18n.t().drop_hint}</span>
         </label>
+    }
+}
+
+/// Exams shipped with the app.
+#[component]
+fn CatalogList() -> impl IntoView {
+    let i18n = use_i18n();
+    let app = use_app();
+    move || {
+        let list = app.catalog.get()?;
+        if list.is_empty() {
+            return None;
+        }
+        Some(view! {
+            <h2 class="section-title">{move || i18n.t().catalog_title}</h2>
+            <div class="catalog">
+                {list
+                    .into_iter()
+                    .map(|entry| {
+                        let history = storage::history(&entry.id);
+                        let last = history.iter().find(|h| !h.retry).map(|h| h.percent());
+                        let attempts = history.len();
+                        let count = entry.questions;
+                        let e = entry.clone();
+                        view! {
+                            <button
+                                class="card exam-card"
+                                disabled=move || app.loading.get()
+                                on:click=move |_| {
+                                    app.load(CatalogSource {
+                                        entry: e.clone(),
+                                        catalog_url: CATALOG_URL.into(),
+                                    })
+                                }
+                            >
+                                {entry.course.clone().map(|c| view! { <span class="exam-course">{c}</span> })}
+                                <strong class="exam-title">{entry.title.clone()}</strong>
+                                {entry
+                                    .description
+                                    .clone()
+                                    .map(|d| view! { <span class="muted exam-desc">{d}</span> })}
+                                <span class="exam-meta">
+                                    {count.map(|n| view! { <span class="pill">{move || i18n.lang().question_count(n)}</span> })}
+                                    {last
+                                        .map(|p| {
+                                            view! {
+                                                <span class="pill subtle">
+                                                    {move || i18n.lang().last_score(p, attempts)}
+                                                </span>
+                                            }
+                                        })}
+                                    <span class="exam-go">{move || i18n.t().start} " →"</span>
+                                </span>
+                            </button>
+                        }
+                    })
+                    .collect_view()}
+            </div>
+        })
     }
 }

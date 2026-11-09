@@ -318,6 +318,7 @@ main.container {
     max-width: 640px;
     margin: 0 auto;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 16px;
 }
 
@@ -336,8 +337,70 @@ main.container {
     margin: 0;
 }
 
+.section-title {
+    font-size: 1rem;
+    margin: 12px 0 -4px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+}
+
+.catalog {
+    display: grid;
+    gap: 12px;
+}
+
+.exam-card {
+    min-width: 0;
+    display: grid;
+    gap: 6px;
+    text-align: left;
+    width: 100%;
+    border-width: 2px;
+    transition: border-color .15s, transform .1s;
+}
+
+.exam-card:hover:not(:disabled) {
+    border-color: var(--accent);
+}
+
+.exam-card:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.exam-course {
+    font-size: .78rem;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.exam-title {
+    font-size: 1.15rem;
+}
+
+.exam-desc {
+    font-size: .92rem;
+}
+
+.exam-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.exam-go {
+    margin-left: auto;
+    font-weight: 700;
+    color: var(--accent);
+}
+
 .loader-card {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
 }
 

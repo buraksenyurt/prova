@@ -6,11 +6,13 @@
 //! implement [`QuizSource`]; the UI talks to the trait, not to a source.
 
 mod browser;
+pub mod catalog;
 
 use std::future::Future;
 use std::pin::Pin;
 
-pub use browser::{FileSource, TextSource, UrlSource};
+pub use browser::{FileSource, TextSource, UrlSource, fetch_text};
+pub use catalog::{CatalogEntry, CatalogSource};
 
 use crate::convert::{self, ConvertError, ConvertOptions, Warning};
 use crate::dto::{self, Parsed, SchemaError};
@@ -24,6 +26,11 @@ pub enum Origin {
     File(String),
     Url(String),
     Sample,
+    /// An exam shipped with the app (`exams/catalog.json`).
+    Catalog {
+        title: String,
+        url: String,
+    },
     /// The copy kept in `localStorage`; carries the original origin's label.
     Saved(String),
 }
@@ -34,6 +41,7 @@ impl Origin {
             Origin::File(name) => name.clone(),
             Origin::Url(url) => url.clone(),
             Origin::Sample => "demo.json".into(),
+            Origin::Catalog { title, .. } => title.clone(),
             Origin::Saved(label) => label.clone(),
         }
     }
@@ -100,7 +108,7 @@ pub fn from_text(raw: String, origin: Origin) -> Result<LoadedQuiz, LoadError> {
 fn markdown_options(origin: &Origin) -> ConvertOptions {
     let mut opts = ConvertOptions::default();
     match origin {
-        Origin::Url(url) => {
+        Origin::Url(url) | Origin::Catalog { url, .. } => {
             let path = url.split(['?', '#']).next().unwrap_or(url);
             if let Some(i) = path.rfind('/') {
                 opts.assets_base_url = Some(path[..=i].to_string());

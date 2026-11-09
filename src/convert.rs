@@ -155,8 +155,18 @@ fn split_sections(text: &str) -> Parsed {
     let mut p = Parsed::default();
     let mut section = Section::Preamble;
     let mut in_fence = false;
+    let mut in_comment = false;
 
     for line in text.lines() {
+        // Multi-line HTML comments are notes for the author; drop them.
+        if in_comment {
+            in_comment = !line.contains("-->");
+            continue;
+        }
+        if !in_fence && line.trim_start().starts_with("<!--") && !line.contains("-->") {
+            in_comment = true;
+            continue;
+        }
         if is_fence(line) {
             in_fence = !in_fence;
         }
@@ -768,6 +778,14 @@ Hangileri doğrudur?
         assert_eq!(p.quiz.id, "prova-markdown-ornegi");
         assert_eq!(p.quiz.settings.time_limit_minutes, Some(10));
         assert!(p.quiz.questions[1].lock_choices);
+    }
+
+    #[test]
+    fn multi_line_comments_are_dropped() {
+        let md = "# T\n<!--\nnot for students\n-->\nIntro\n## Soru 1\n<!--\nnote\n-->\nS\n- A) a\n- B) b\n";
+        let p = dto::parse(&convert(md).json).unwrap();
+        assert_eq!(p.quiz.description.as_deref(), Some("Intro"));
+        assert_eq!(p.quiz.questions[0].stem, "S");
     }
 
     #[test]

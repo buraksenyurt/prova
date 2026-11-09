@@ -1,0 +1,12 @@
+{
+  "exams": [
+    {
+      "id": "ai-dev-final-00",
+      "title": "Final Sınavı Örnek Soruları",
+      "course": "Yapay Zeka Destekli Yazılım Geliştirme",
+      "description": "Test, kod kalitesi ve mimariden RAG, MCP ve yapay zeka güvenliğine kadar dönemin tüm konularını kapsayan örnek final soruları.",
+      "file": "ai-dev-final-00.md",
+      "questions": 27
+    }
+  ]
+}

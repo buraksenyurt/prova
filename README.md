@@ -23,6 +23,7 @@ cargo test
 
 ## Özellikler
 
+- **Ders sınavları:** "Yapay Zeka Destekli Yazılım Geliştirme" dersinin final örnek soruları (27 soru, konu etiketli) uygulamayla birlikte gelir ve ana sayfadan tek tıkla açılır. Doğrudan link: `https://buraksenyurt.github.io/prova/?exam=ai-dev-final-00`
 - **Yükleme:** JSON test dosyasını veya [Markdown ile yazılmış bir sınavı](#markdown-ile-sınav-yazmak) sürükle-bırak veya seç, bir adresten yükle ya da gömülü örnek testi dene.
 - **Paylaşılabilir link:** `https://buraksenyurt.github.io/prova/?quiz=<adres>` testi açılışta otomatik yükler. Raw GitHub veya gist adresleri CORS'a izin verdiği için doğrudan çalışır; GitHub'daki `.../blob/...` sayfa linki de otomatik olarak raw adrese çevrilir.
 - **İki mod**
@@ -81,6 +82,30 @@ Metin alanlarında Markdown kullanılabilir: kod blokları, tablolar, listeler, 
 
 Dosyadaki hatalar soru kimliğiyle birlikte anlaşılır bir mesajla gösterilir (geçersiz JSON'da satır/sütun bilgisiyle).
 
+## Ders sınavları
+
+Uygulamayla birlikte gelen sınavlar [`exams/`](exams) klasöründe durur ve [`exams/catalog.json`](exams/catalog.json) ile listelenir. Trunk bu klasörü olduğu gibi derlemeye kopyalar; uygulama kataloğu açılışta okur.
+
+Yeni bir sınav eklemek için:
+
+1. Sınavı [Markdown biçiminde](#markdown-ile-sınav-yazmak) (ya da JSON olarak) `exams/` altına koy. Görseller `exams/images/` altına, Markdown'da `./images/...` yoluyla.
+2. Dosyaya `<!-- id: ... -->` ile bir kimlik ver ve `catalog.json`'a aynı `id` ile bir kayıt ekle:
+
+```json
+{
+  "id": "ai-dev-final-00",
+  "title": "Final Sınavı Örnek Soruları",
+  "course": "Yapay Zeka Destekli Yazılım Geliştirme",
+  "description": "Kısa açıklama",
+  "file": "ai-dev-final-00.md",
+  "questions": 27
+}
+```
+
+3. `cargo test` çalıştır. `shipped_exams_are_valid` testi her sınavın uyarısız dönüştüğünü, tüm cevapların olduğunu, kimliğin ve soru sayısının katalogla aynı olduğunu ve göreli görsellerin klasörde bulunduğunu doğrular. Aynı test CI'da her push'ta çalışır.
+
+`ai-dev-final-00.md`, ders reposundaki [Exam00.md](https://github.com/buraksenyurt/ai-based-development-lecture/blob/main/Exam00.md) dosyasının kopyasıdır; konu ilerlemesi için her soruya `<!-- topics: ... -->` etiketi eklenmiştir.
+
 ## Markdown ile sınav yazmak
 
 Sınavları JSON yerine doğrudan Markdown ile yazabilirsin. `.md` dosyası uygulamaya yüklendiğinde tarayıcıda JSON'a çevrilir; giriş ekranındaki **JSON olarak indir** düğmesiyle dönüştürülmüş hali alınabilir. Örnek: [`samples/exam-sample.md`](samples/exam-sample.md)
@@ -135,9 +160,10 @@ src/
 ├── dto/          Dosya formatları (v1) → domain dönüşümü ve doğrulama
 ├── convert.rs    Sınav Markdown'ı → JSON (uygulama ve md2quiz ortak kullanır)
 ├── bin/md2quiz.rs  Komut satırı dönüştürücü
-├── source/       QuizSource trait'i: dosya, URL, gömülü/saklanan metin
+├── source/       QuizSource trait'i: dosya, URL, katalog, gömülü/saklanan metin
 ├── grading/      Grader trait'i: LocalGrader (cevap anahtarıyla, tarayıcıda)
 ├── markdown.rs   Güvenli Markdown render, görsel yolları, olumsuz kök vurgusu
+exams/            Uygulamayla gelen sınavlar ve catalog.json
 assets/
 ├── enhance.js    highlight.js ve KaTeX'i ihtiyaç anında yükleyip uygular
 └── vendor/       highlight.js 11.11.1 ve KaTeX 0.16.25 (lisanslarıyla)
@@ -161,7 +187,7 @@ assets/
 ## Yol haritası
 
 - ~~**Faz 2:** kod renklendirme, KaTeX ile formüller, Exam Markdown → JSON dönüştürücü, konu bazlı ilerleme geçmişi.~~
-- **Faz 3:** `ApiSource` + `RemoteGrader`, servis tarafı, öğrenci kimliği ve sonuçların toplanması.
+- **Faz 3 (beklemede):** `ApiSource` + `RemoteGrader`, servis tarafı, öğrenci kimliği ve sonuçların toplanması. Statik soru setleri ve cevaplar ayrı bir repoya taşınabilir; o zamana kadar sınavlar `exams/` klasöründe uygulamayla birlikte yayınlanıyor. Katalog adresi (`CATALOG_URL`) servise yönlendirilerek bu yapı kademeli olarak taşınabilir.
 
 ## Yayınlama
 

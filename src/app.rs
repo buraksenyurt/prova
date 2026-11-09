@@ -10,7 +10,11 @@ use crate::convert::Warning;
 use crate::domain::{Attempt, AttemptOptions, HistoryEntry, Quiz, summarize};
 use crate::grading::{Grader, LocalGrader, Submission};
 use crate::i18n::I18n;
-use crate::source::{LoadError, LoadedQuiz, Origin, QuizSource, TextSource, UrlSource, from_text};
+use crate::source::catalog::{CATALOG_URL, fetch_catalog};
+use crate::source::{
+    CatalogEntry, CatalogSource, LoadError, LoadedQuiz, Origin, QuizSource, TextSource, UrlSource,
+    from_text,
+};
 use crate::storage::{self, SavedQuiz};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -43,6 +47,8 @@ pub struct AppState {
     pub loading: RwSignal<bool>,
     pub load_error: RwSignal<Option<LoadError>>,
     pub grade_failed: RwSignal<bool>,
+    /// Exams shipped with the app; `None` while the catalog is loading.
+    pub catalog: RwSignal<Option<Vec<CatalogEntry>>>,
 }
 
 pub fn use_app() -> AppState {
@@ -62,6 +68,7 @@ impl AppState {
             loading: RwSignal::new(false),
             load_error: RwSignal::new(None),
             grade_failed: RwSignal::new(false),
+            catalog: RwSignal::new(None),
         }
     }
 
@@ -222,11 +229,11 @@ fn scroll_top() {
     }
 }
 
-/// `?quiz=<url>`: a link the instructor can share.
-fn quiz_url_param() -> Option<String> {
+/// Links the instructor can share: `?quiz=<url>` or `?exam=<catalog id>`.
+fn url_param(name: &str) -> Option<String> {
     let search = web_sys::window()?.location().search().ok()?;
     let params = web_sys::UrlSearchParams::new_with_str(&search).ok()?;
-    params.get("quiz").filter(|u| !u.trim().is_empty())
+    params.get(name).filter(|u| !u.trim().is_empty())
 }
 
 #[component]
@@ -244,9 +251,21 @@ pub fn App() -> impl IntoView {
         })
     });
 
-    if let Some(url) = quiz_url_param() {
+    if let Some(url) = url_param("quiz") {
         state.load(UrlSource { url });
     }
+    let exam_param = url_param("exam");
+    spawn_local(async move {
+        // Without a catalog the app still works with files and URLs.
+        let list = fetch_catalog(CATALOG_URL).await.unwrap_or_default();
+        if let Some(entry) = exam_param.and_then(|id| list.iter().find(|e| e.id == id).cloned()) {
+            state.load(CatalogSource {
+                entry,
+                catalog_url: CATALOG_URL.into(),
+            });
+        }
+        state.catalog.set(Some(list));
+    });
 
     view! {
         <AppHeader />

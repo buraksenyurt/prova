@@ -194,6 +194,15 @@ impl Lang {
         }
     }
 
+    pub fn last_score(self, percent: f64, attempts: usize) -> String {
+        let p = self.percent(percent);
+        match self {
+            Lang::Tr => format!("Son: {p} · {attempts} deneme"),
+            Lang::En if attempts == 1 => format!("Last: {p} · 1 attempt"),
+            Lang::En => format!("Last: {p} · {attempts} attempts"),
+        }
+    }
+
     pub fn change(self, delta: f64) -> String {
         let n = delta.round() as i64;
         match n {
@@ -398,6 +407,8 @@ pub struct Texts {
     pub progress_hint: &'static str,
     pub retry_tag: &'static str,
     pub vs_previous: &'static str,
+    pub catalog_title: &'static str,
+    pub own_file_title: &'static str,
 }
 
 const TR: Texts = Texts {
@@ -406,7 +417,7 @@ const TR: Texts = Texts {
     theme_dark: "Koyu temaya geç",
     theme_light: "Açık temaya geç",
     home_title: "Sınava hazır mısın?",
-    home_lead: "Hocanın paylaştığı test dosyasını yükle, ister antrenman yap ister gerçek sınav gibi süre tutarak çöz.",
+    home_lead: "Ders sınavlarından birini seç ya da kendi test dosyanı yükle; ister antrenman yap, ister gerçek sınav gibi süre tutarak çöz.",
     drop_title: "Test dosyasını buraya bırak",
     drop_hint: "ya da tıklayıp seç (.json veya sınav .md dosyası)",
     or: "veya",
@@ -483,6 +494,8 @@ const TR: Texts = Texts {
     progress_hint: "Son denemelerin, eskiden yeniye. Tekrar çözümleri dahil değil.",
     retry_tag: "tekrar",
     vs_previous: "Önceki denemeye göre",
+    catalog_title: "Ders sınavları",
+    own_file_title: "Kendi test dosyan",
 };
 
 const EN: Texts = Texts {
@@ -491,7 +504,7 @@ const EN: Texts = Texts {
     theme_dark: "Switch to dark theme",
     theme_light: "Switch to light theme",
     home_title: "Ready for the exam?",
-    home_lead: "Load the test file your instructor shared, then practice freely or solve it against the clock like the real exam.",
+    home_lead: "Pick one of the course exams or load your own test file, then practice freely or solve it against the clock like the real exam.",
     drop_title: "Drop the test file here",
     drop_hint: "or click to choose (.json or an exam .md file)",
     or: "or",
@@ -568,6 +581,8 @@ const EN: Texts = Texts {
     progress_hint: "Your recent attempts, oldest to newest. Retries are not included.",
     retry_tag: "retry",
     vs_previous: "Compared to the previous attempt",
+    catalog_title: "Course exams",
+    own_file_title: "Your own test file",
 };
 
 /// Selected language, shared through context.

@@ -1,4 +1,4 @@
-//! Phase 1 sources, built on browser APIs.
+//! Sources built on browser APIs.
 
 use wasm_bindgen::{JsCast, JsValue};
 use wasm_bindgen_futures::JsFuture;
@@ -48,7 +48,25 @@ impl QuizSource for FileSource {
     }
 }
 
-/// A quiz published somewhere (raw GitHub, gist, Pages ...). The server must allow CORS.
+/// GET `url` as text. The server must allow CORS.
+pub async fn fetch_text(url: &str) -> Result<String, LoadError> {
+    let window = web_sys::window().ok_or_else(|| LoadError::Network("no window".into()))?;
+    let resp = JsFuture::from(window.fetch_with_str(url))
+        .await
+        .map_err(|e| LoadError::Network(describe(e)))?;
+    let resp: Response = resp
+        .dyn_into()
+        .map_err(|e| LoadError::Network(describe(e)))?;
+    if !resp.ok() {
+        return Err(LoadError::Http(resp.status()));
+    }
+    let text = JsFuture::from(resp.text().map_err(|e| LoadError::Network(describe(e)))?)
+        .await
+        .map_err(|e| LoadError::Network(describe(e)))?;
+    Ok(text.as_string().unwrap_or_default())
+}
+
+/// A quiz published somewhere (raw GitHub, gist, Pages ...).
 pub struct UrlSource {
     pub url: String,
 }
@@ -57,20 +75,7 @@ impl QuizSource for UrlSource {
     fn load(&self) -> LocalFuture<Result<LoadedQuiz, LoadError>> {
         let url = raw_github_url(self.url.trim());
         Box::pin(async move {
-            let window = web_sys::window().ok_or_else(|| LoadError::Network("no window".into()))?;
-            let resp = JsFuture::from(window.fetch_with_str(&url))
-                .await
-                .map_err(|e| LoadError::Network(describe(e)))?;
-            let resp: Response = resp
-                .dyn_into()
-                .map_err(|e| LoadError::Network(describe(e)))?;
-            if !resp.ok() {
-                return Err(LoadError::Http(resp.status()));
-            }
-            let text = JsFuture::from(resp.text().map_err(|e| LoadError::Network(describe(e)))?)
-                .await
-                .map_err(|e| LoadError::Network(describe(e)))?;
-            let text = text.as_string().unwrap_or_default();
+            let text = fetch_text(&url).await?;
             from_text(text, Origin::Url(url))
         })
     }
