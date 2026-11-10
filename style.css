@@ -840,6 +840,16 @@ main.container {
 }
 
 /* ---------- markdown ---------- */
+.md {
+    min-width: 0;
+    /* Long paths, URLs and identifiers wrap instead of widening the card */
+    overflow-wrap: break-word;
+}
+
+.md pre {
+    overflow-wrap: normal;
+}
+
 .md> :first-child {
     margin-top: 0;
 }
@@ -958,6 +968,7 @@ mark.neg {
     margin: 0;
     padding: 0;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 10px;
 }
 
@@ -969,6 +980,7 @@ mark.neg {
 
 .choice-main {
     flex: 1;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -1468,6 +1480,9 @@ mark.neg {
 
 .review-list {
     display: grid;
+    /* Grid items default to min-width: auto, so a long code line or table
+       would stretch the whole card; let them shrink and scroll instead. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 14px;
 }
 
