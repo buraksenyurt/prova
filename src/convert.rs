@@ -71,6 +71,11 @@ pub enum Warning {
     },
     /// Relative image paths but no base URL to resolve them.
     RelativeImages,
+    /// The explanation refers to options by letter (**A**) but the options
+    /// may be shuffled, so the letters would not match what the student sees.
+    LettersInShuffledExplanation {
+        question: u32,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -295,6 +300,16 @@ fn looks_order_dependent(options: &[String]) -> bool {
     })
 }
 
+/// `**A**`, `**B)**` ... in an explanation.
+fn mentions_option_letter(text: &str) -> bool {
+    text.match_indices("**").any(|(i, _)| {
+        let rest = &text[i + 2..];
+        let mut chars = rest.chars();
+        matches!(chars.next(), Some('A'..='H'))
+            && matches!(chars.as_str().trim_start_matches(')').get(..2), Some("**"))
+    })
+}
+
 fn has_relative_image(text: &str) -> bool {
     text.match_indices("](").any(|(i, _)| {
         let before = &text[..i];
@@ -450,6 +465,9 @@ fn build_question(
         v.insert("lock_options".into(), json!(true));
     }
     let explanation = trim_blank(&explanation);
+    if !lock && mentions_option_letter(&explanation) {
+        warnings.push(Warning::LettersInShuffledExplanation { question: q.number });
+    }
     if !explanation.is_empty() {
         v.insert("explanation".into(), json!(explanation));
     }
@@ -786,6 +804,18 @@ Hangileri doğrudur?
         let p = dto::parse(&convert(md).json).unwrap();
         assert_eq!(p.quiz.description.as_deref(), Some("Intro"));
         assert_eq!(p.quiz.questions[0].stem, "S");
+    }
+
+    #[test]
+    fn letters_in_explanation_need_locked_options() {
+        let md = "# T\n## Soru 1\nS\n- A) a\n- B) b\n> Açıklama: **B** doğru, **A** değil.\n## Soru 2\n<!-- lock -->\nS\n- A) a\n- B) b\n> **A)** yanlış.\n";
+        let c = convert(md);
+        assert_eq!(
+            c.warnings,
+            vec![Warning::LettersInShuffledExplanation { question: 1 }]
+        );
+        assert!(mentions_option_letter("**C)** x"));
+        assert!(!mentions_option_letter("**API** ve **Ajan**"));
     }
 
     #[test]

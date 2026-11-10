@@ -7,6 +7,14 @@
       "description": "Test, kod kalitesi ve mimariden RAG, MCP ve yapay zeka güvenliğine kadar dönemin tüm konularını kapsayan örnek final soruları.",
       "file": "ai-dev-final-00.md",
       "questions": 27
+    },
+    {
+      "id": "ai-dev-practice-01",
+      "title": "Senaryo Soruları I",
+      "course": "Yapay Zeka Destekli Yazılım Geliştirme",
+      "description": "RAG ve türevleri, MCP, Skill'ler, döngü mühendisliği, token gözlemleme, LoRA ve güvenlik üzerine ezbere değil muhakemeye dayalı 10 soru. Her sorunun açıklaması diğer şıkların neden yanlış olduğunu da anlatır.",
+      "file": "ai-dev-practice-01.md",
+      "questions": 10
     }
   ]
 }

@@ -23,7 +23,9 @@ cargo test
 
 ## Özellikler
 
-- **Ders sınavları:** "Yapay Zeka Destekli Yazılım Geliştirme" dersinin final örnek soruları (27 soru, konu etiketli) uygulamayla birlikte gelir ve ana sayfadan tek tıkla açılır. Doğrudan link: `https://buraksenyurt.github.io/prova/?exam=ai-dev-final-00`
+- **Ders sınavları:** "Yapay Zeka Destekli Yazılım Geliştirme" dersinin sınavları uygulamayla birlikte gelir ve ana sayfadan tek tıkla açılır:
+  - Final örnek soruları, 27 soru: `?exam=ai-dev-final-00`
+  - Senaryo Soruları I, 10 açıklamalı senaryo sorusu (RAG, MCP, Skill, döngü mühendisliği, LoRA, güvenlik): `?exam=ai-dev-practice-01`
 - **Yükleme:** JSON test dosyasını veya [Markdown ile yazılmış bir sınavı](#markdown-ile-sınav-yazmak) sürükle-bırak veya seç, bir adresten yükle ya da gömülü örnek testi dene.
 - **Paylaşılabilir link:** `https://buraksenyurt.github.io/prova/?quiz=<adres>` testi açılışta otomatik yükler. Raw GitHub veya gist adresleri CORS'a izin verdiği için doğrudan çalışır; GitHub'daki `.../blob/...` sayfa linki de otomatik olarak raw adrese çevrilir.
 - **İki mod**
@@ -136,6 +138,7 @@ Soru kökü: kod blokları, tablolar, görseller, "- I." öncülleri olabilir.
 - Sorular `## Soru N` veya `## Question N` başlıklarıyla başlar. Şıklar `- A) ...` (ya da `- **A)** ...`) biçimindedir ve A'dan başlayıp sırayla gider.
 - Cevaplar `## Cevap Anahtarı` / `## Answer Key` tablosundan ya da soru içindeki `<!-- answer: B -->` yorumundan okunur. Ya tüm soruların cevabı olmalı ya da hiçbirinin.
 - `<!-- topics: ... -->` konu etiketleri, `<!-- lock -->` şık sırasını korur. "Hepsi", "Yalnızca I ve II" gibi şıklarda sıra zaten otomatik korunur.
+- Açıklama şıklara harfle atıf yapıyorsa (`**A**` yanlış, çünkü ...) soruya `<!-- lock -->` ekle; aksi halde şıklar karıştırıldığında harfler tutmaz. Dönüştürücü bu durumda uyarı verir.
 - Dosya bir URL'den yüklendiğinde göreli görsel yolları (`./images/x.png`) dosyanın klasörüne göre çözülür.
 
 Komut satırından:

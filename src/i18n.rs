@@ -188,6 +188,12 @@ impl Lang {
             (Lang::Tr, Warning::RelativeImages) => {
                 "Göreli görsel yolları var ama temel adres bilinmiyor; görseller görünmeyebilir. Dosyayı bir URL'den yükleyin.".into()
             }
+            (Lang::Tr, Warning::LettersInShuffledExplanation { question }) => format!(
+                "Soru {question}: açıklama şıklara harfle atıf yapıyor ama şıklar karıştırılabilir; harfler uyuşmayabilir. Soruya <!-- lock --> ekleyin."
+            ),
+            (Lang::En, Warning::LettersInShuffledExplanation { question }) => format!(
+                "Question {question}: the explanation refers to options by letter but options may be shuffled. Add <!-- lock --> to the question."
+            ),
             (Lang::En, Warning::RelativeImages) => {
                 "Relative image paths but no base URL; images may not show. Load the file from a URL instead.".into()
             }

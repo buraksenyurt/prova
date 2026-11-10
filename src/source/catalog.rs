@@ -118,6 +118,19 @@ mod tests {
                 c.json
             };
             let parsed = dto::parse(&json).unwrap_or_else(|e| panic!("{}: {e:?}", entry.file));
+            // Leftovers of a broken HTML comment would show up as text.
+            let texts = parsed
+                .quiz
+                .description
+                .iter()
+                .chain(parsed.quiz.questions.iter().map(|q| &q.stem));
+            for t in texts {
+                assert!(
+                    !t.contains("<!--") && !t.contains("-->"),
+                    "{}: stray HTML comment in {t:?}",
+                    entry.file
+                );
+            }
             assert_eq!(
                 parsed.quiz.id, entry.id,
                 "{}: id must match the catalog",
