@@ -33,7 +33,10 @@ use serde_json::{Map, Value, json};
 
 #[derive(Debug, Clone, Default)]
 pub struct ConvertOptions {
+    /// Forces the quiz id (CLI `--id`, catalog entry id).
     pub id: Option<String>,
+    /// Used only when the file has no `<!-- id: -->` (e.g. the file name).
+    pub default_id: Option<String>,
     pub assets_base_url: Option<String>,
     pub time_limit_minutes: Option<u32>,
     pub shuffle_questions: bool,
@@ -200,6 +203,10 @@ fn split_sections(text: &str) -> Parsed {
                 }
             }
         }
+        if !in_fence && !matches!(section, Section::Key) && is_key_table_header(line) {
+            section = Section::Key;
+            continue;
+        }
         match section {
             Section::Preamble => match meta_comment(line) {
                 Some((k, v)) if !in_fence => {
@@ -217,6 +224,20 @@ fn split_sections(text: &str) -> Parsed {
         }
     }
     p
+}
+
+/// `| Soru No | Doğru Cevap |` starts an answer key even without a heading.
+fn is_key_table_header(line: &str) -> bool {
+    let cells: Vec<String> = line
+        .split('|')
+        .map(|c| c.trim().trim_matches('*').to_lowercase())
+        .filter(|c| !c.is_empty())
+        .collect();
+    cells.len() >= 2
+        && (cells[0].starts_with("soru") || cells[0].starts_with("question"))
+        && cells[1..]
+            .iter()
+            .any(|c| c.contains("cevap") || c.contains("answer"))
 }
 
 /// `| 12 | C |` → (12, 'C')
@@ -238,28 +259,38 @@ fn key_row(line: &str) -> Option<(u32, char)> {
     ('A'..='H').contains(&letter).then_some((n, letter))
 }
 
-/// `- A) text`, `* **B)** text`, `- c) text` → ('A', "text")
+/// Option lines, in the styles exam authors actually use:
+/// `- A) text`, `* **B)** text`, `- c) text`, `A) text`, `A-) text`, and a bare
+/// `A)` followed by a code block. Without a list bullet only capital letters
+/// count, so ordinary sentences are not mistaken for options.
 fn option_line(line: &str) -> Option<(char, String)> {
     let indent = line.len() - line.trim_start().len();
     if indent > 3 {
         return None;
     }
     let t = line.trim_start();
-    let t = t
-        .strip_prefix(['-', '*', '+'])?
-        .strip_prefix(' ')?
-        .trim_start();
+    let (bulleted, t) = match t
+        .strip_prefix(['-', '*', '+'])
+        .and_then(|r| r.strip_prefix(' '))
+    {
+        Some(rest) => (true, rest.trim_start()),
+        None => (false, t),
+    };
     let t = t.trim_start_matches("**");
     let mut chars = t.chars();
-    let letter = chars.next()?.to_ascii_uppercase();
-    if !('A'..='H').contains(&letter) {
+    let first = chars.next()?;
+    let letter = first.to_ascii_uppercase();
+    if !('A'..='H').contains(&letter) || (!bulleted && !first.is_ascii_uppercase()) {
         return None;
     }
-    // ")", ")**" or "**)"
+    // ")", "-)", ")**", "**)"
     let rest = chars.as_str();
     let rest = rest.strip_prefix("**").unwrap_or(rest);
-    let rest = rest.strip_prefix(')')?;
+    let rest = rest.strip_prefix("-)").or_else(|| rest.strip_prefix(')'))?;
     let rest = rest.strip_prefix("**").unwrap_or(rest);
+    if !bulleted && !(rest.is_empty() || rest.starts_with(' ')) {
+        return None;
+    }
     Some((letter, rest.trim().to_string()))
 }
 
@@ -373,6 +404,7 @@ fn build_question(
         After,
     }
     let mut part = Part::Stem;
+    let mut fence_indent = 0;
 
     for line in q.lines {
         let fence = is_fence(&line);
@@ -410,9 +442,17 @@ fn build_question(
             Part::Stem => stem.push(line),
             Part::Options => {
                 let continuation = line.starts_with("  ") || line.starts_with('\t');
-                if line.trim().is_empty() {
+                let lead = line.len() - line.trim_start().len();
+                if fence && in_fence {
+                    fence_indent = lead; // opening fence of a code block
+                }
+                if in_fence || fence {
+                    // Keep code indentation; only drop the list item's own indent.
+                    let cut = lead.min(fence_indent);
+                    options.last_mut().unwrap().1.push(line[cut..].to_string());
+                } else if line.trim().is_empty() {
                     continue;
-                } else if continuation || in_fence || fence {
+                } else if continuation {
                     options
                         .last_mut()
                         .unwrap()
@@ -524,6 +564,7 @@ pub fn exam_markdown_to_json(text: &str, opts: &ConvertOptions) -> Result<Conver
         .id
         .clone()
         .or_else(|| parsed.meta.get("id").cloned())
+        .or_else(|| opts.default_id.clone())
         .map(|s| slug(&s))
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| {
@@ -735,6 +776,17 @@ Hangileri doğrudur?
 
     #[test]
     fn options_and_base_url() {
+        let with_default = ConvertOptions {
+            default_id: Some("file-name".into()),
+            ..Default::default()
+        };
+        assert_eq!(
+            dto::parse(&exam_markdown_to_json(EXAM, &with_default).unwrap().json)
+                .unwrap()
+                .quiz
+                .id,
+            "file-name"
+        );
         let o = ConvertOptions {
             id: Some("Exam 00".into()),
             assets_base_url: Some("https://x.io/".into()),
@@ -816,6 +868,23 @@ Hangileri doğrudur?
         );
         assert!(mentions_option_letter("**C)** x"));
         assert!(!mentions_option_letter("**API** ve **Ajan**"));
+    }
+
+    #[test]
+    fn other_option_styles_and_key_without_heading() {
+        let md = "# T\n## Soru 1\nHangisi?\n\nA)\n\n```csharp\npublic class A\n{\n\n    int x;\n}\n```\n\nB)\n\n```csharp\nclass B {}\n```\n\n## Soru 2\nS\n\nA-) bir\nB-) iki\n\n| Soru | Doğru Cevap |\n|---|---|\n| 1 | A |\n| 2 | B |\n";
+        let c = convert(md);
+        assert!(c.warnings.is_empty(), "{:?}", c.warnings);
+        assert_eq!(c.answers, 2);
+        let p = dto::parse(&c.json).unwrap();
+        let a = &p.quiz.questions[0].choices[0].text;
+        assert!(a.contains("public class A\n{\n\n    int x;\n}"), "{a:?}");
+        assert_eq!(p.quiz.questions[1].choices[1].text, "iki");
+        assert_eq!(option_line("Ağaç yapısı"), None);
+        assert_eq!(option_line("a) küçük harf madde değil"), None);
+        assert_eq!(option_line("C# bir dildir"), None);
+        assert!(is_key_table_header("| **Soru No** | **Doğru Cevap** |"));
+        assert!(!is_key_table_header("| Kavram | Tanım |"));
     }
 
     #[test]

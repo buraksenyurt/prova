@@ -62,9 +62,10 @@ impl QuizSource for CatalogSource {
     fn load(&self) -> LocalFuture<Result<LoadedQuiz, LoadError>> {
         let url = self.entry.url(&self.catalog_url);
         let title = self.entry.title.clone();
+        let id = self.entry.id.clone();
         Box::pin(async move {
             let text = fetch_text(&url).await?;
-            from_text(text, Origin::Catalog { title, url })
+            from_text(text, Origin::Catalog { id, title, url })
         })
     }
 }
@@ -74,8 +75,6 @@ mod tests {
     use std::collections::HashSet;
 
     use super::*;
-    use crate::convert::{ConvertOptions, exam_markdown_to_json};
-    use crate::dto;
 
     #[test]
     fn entry_urls() {
@@ -105,19 +104,21 @@ mod tests {
             assert!(ids.insert(entry.id.clone()), "duplicate id {}", entry.id);
             let text = std::fs::read_to_string(format!("{root}{}", entry.file))
                 .unwrap_or_else(|e| panic!("{}: {e}", entry.file));
-            let json = if entry.file.ends_with(".json") {
-                text
-            } else {
-                let opts = ConvertOptions {
-                    assets_base_url: Some("exams/".into()),
-                    ..Default::default()
-                };
-                let c = exam_markdown_to_json(&text, &opts)
-                    .unwrap_or_else(|e| panic!("{}: {e:?}", entry.file));
-                assert!(c.warnings.is_empty(), "{}: {:?}", entry.file, c.warnings);
-                c.json
+            // Exactly the path the app takes when a catalog card is clicked.
+            let origin = Origin::Catalog {
+                id: entry.id.clone(),
+                title: entry.title.clone(),
+                url: entry.url(CATALOG_URL),
             };
-            let parsed = dto::parse(&json).unwrap_or_else(|e| panic!("{}: {e:?}", entry.file));
+            let loaded =
+                from_text(text, origin).unwrap_or_else(|e| panic!("{}: {e:?}", entry.file));
+            assert!(
+                loaded.warnings.is_empty(),
+                "{}: {:?}",
+                entry.file,
+                loaded.warnings
+            );
+            let parsed = loaded.parsed;
             // Leftovers of a broken HTML comment would show up as text.
             let texts = parsed
                 .quiz
@@ -149,12 +150,13 @@ mod tests {
                 );
             }
             // Images referenced with relative paths must exist in the folder.
+            let file_dir = entry.file.rfind('/').map_or("", |i| &entry.file[..=i]);
             for q in &parsed.quiz.questions {
                 for (i, _) in q.stem.match_indices("](./") {
                     let rest = &q.stem[i + 4..];
                     let path = &rest[..rest.find(')').unwrap()];
                     assert!(
-                        std::path::Path::new(&format!("{root}{path}")).exists(),
+                        std::path::Path::new(&format!("{root}{file_dir}{path}")).exists(),
                         "{}: missing {path}",
                         entry.file
                     );

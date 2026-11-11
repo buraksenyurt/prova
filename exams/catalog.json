@@ -15,6 +15,38 @@
       "description": "RAG ve türevleri, MCP, Skill'ler, döngü mühendisliği, token gözlemleme, LoRA ve güvenlik üzerine ezbere değil muhakemeye dayalı 10 soru. Her sorunun açıklaması diğer şıkların neden yanlış olduğunu da anlatır.",
       "file": "ai-dev-practice-01.md",
       "questions": 10
+    },
+    {
+      "id": "oop-00",
+      "title": "OOP Temelleri ve C# Tip Sistemi",
+      "course": "OOP in Enterprise",
+      "description": "Nesne yönelimli programlama kavramlarını konsol uygulaması, sınıf tasarımı, tip sistemi, koleksiyonlar ve istisna yönetimi senaryoları üzerinden değerlendirir.",
+      "file": "oop-in-enterprise/quiz00.md",
+      "questions": 12
+    },
+    {
+      "id": "oop-01",
+      "title": "SOLID, Kod Kalitesi ve Güvenlik",
+      "course": "OOP in Enterprise",
+      "description": "Code review senaryolarıyla SOLID ilkeleri, kod güvenliği, temel nesne yönelimli prensipler ve bazı mimari konular.",
+      "file": "oop-in-enterprise/quiz01.md",
+      "questions": 16
+    },
+    {
+      "id": "oop-02",
+      "title": "Veri Yapıları ve Algoritma Performansı",
+      "course": "OOP in Enterprise",
+      "description": "Matematiksel kavramların C# ile modellenmesi, class/struct/record seçimi, yield ve lazy evaluation, BigO ve performans etkileri.",
+      "file": "oop-in-enterprise/quiz02.md",
+      "questions": 20
+    },
+    {
+      "id": "oop-03",
+      "title": "Dependency Injection",
+      "course": "OOP in Enterprise",
+      "description": "DI Container, servis ömürleri (Scoped, Singleton, Transient) ve aynı arayüzün birden fazla implementasyonu gibi kurumsal DI senaryoları.",
+      "file": "oop-in-enterprise/quiz03.md",
+      "questions": 5
     }
   ]
 }

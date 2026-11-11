@@ -28,6 +28,8 @@ pub enum Origin {
     Sample,
     /// An exam shipped with the app (`exams/catalog.json`).
     Catalog {
+        /// Catalog id; becomes the quiz id so history matches the catalog.
+        id: String,
         title: String,
         url: String,
     },
@@ -113,10 +115,13 @@ fn markdown_options(origin: &Origin) -> ConvertOptions {
             if let Some(i) = path.rfind('/') {
                 opts.assets_base_url = Some(path[..=i].to_string());
             }
+            if let Origin::Catalog { id, .. } = origin {
+                opts.id = Some(id.clone());
+            }
         }
         Origin::File(name) => {
             let stem = name.rsplit_once('.').map_or(name.as_str(), |(s, _)| s);
-            opts.id = Some(stem.to_string()).filter(|s| !s.is_empty());
+            opts.default_id = Some(stem.to_string()).filter(|s| !s.is_empty());
         }
         _ => {}
     }

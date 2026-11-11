@@ -17,7 +17,7 @@ Usage: md2quiz <exam.md> [options]
 
 Options:
   -o, --output <file>        Write the JSON here (default: stdout)
-      --id <id>              Quiz id (default: from <!-- id: --> or the title)
+      --id <id>              Quiz id (default: from <!-- id: --> or the file name)
       --assets-base-url <u>  Base URL for relative image paths
       --time <minutes>       Time limit for exam mode
       --shuffle-questions    Shuffle questions by default
@@ -66,13 +66,10 @@ fn run(args: Vec<String>) -> Result<(), String> {
     }
     let input = input.ok_or_else(|| USAGE.to_string())?;
     let text = std::fs::read_to_string(&input).map_err(|e| format!("{input}: {e}"))?;
-    if opts.id.is_none() {
-        // Fallback for files without a title or id comment.
-        opts.id = Path::new(&input)
-            .file_stem()
-            .map(|s| s.to_string_lossy().into_owned())
-            .filter(|_| !text.contains("<!-- id:") && !text.lines().any(|l| l.starts_with("# ")));
-    }
+    // Used when the file has no <!-- id: --> comment.
+    opts.default_id = Path::new(&input)
+        .file_stem()
+        .map(|s| s.to_string_lossy().into_owned());
 
     let lang = Lang::En;
     let converted = exam_markdown_to_json(&text, &opts).map_err(|e| lang.convert_error(&e))?;

@@ -26,6 +26,7 @@ cargo test
 - **Ders sınavları:** "Yapay Zeka Destekli Yazılım Geliştirme" dersinin sınavları uygulamayla birlikte gelir ve ana sayfadan tek tıkla açılır:
   - Final örnek soruları, 27 soru: `?exam=ai-dev-final-00`
   - Senaryo Soruları I, 10 açıklamalı senaryo sorusu (RAG, MCP, Skill, döngü mühendisliği, LoRA, güvenlik): `?exam=ai-dev-practice-01`
+- **OOP in Enterprise sınavları:** C# ağırlıklı dört set; OOP temelleri (`oop-00`), SOLID ve kod kalitesi (`oop-01`), veri yapıları ve algoritma performansı (`oop-02`), Dependency Injection (`oop-03`).
 - **Yükleme:** JSON test dosyasını veya [Markdown ile yazılmış bir sınavı](#markdown-ile-sınav-yazmak) sürükle-bırak veya seç, bir adresten yükle ya da gömülü örnek testi dene.
 - **Paylaşılabilir link:** `https://buraksenyurt.github.io/prova/?quiz=<adres>` testi açılışta otomatik yükler. Raw GitHub veya gist adresleri CORS'a izin verdiği için doğrudan çalışır; GitHub'daki `.../blob/...` sayfa linki de otomatik olarak raw adrese çevrilir.
 - **İki mod**
@@ -91,7 +92,7 @@ Uygulamayla birlikte gelen sınavlar [`exams/`](exams) klasöründe durur ve [`e
 Yeni bir sınav eklemek için:
 
 1. Sınavı [Markdown biçiminde](#markdown-ile-sınav-yazmak) (ya da JSON olarak) `exams/` altına koy. Görseller `exams/images/` altına, Markdown'da `./images/...` yoluyla.
-2. Dosyaya `<!-- id: ... -->` ile bir kimlik ver ve `catalog.json`'a aynı `id` ile bir kayıt ekle:
+2. `catalog.json`'a bir kayıt ekle. Kataloğun `id`'si testin kimliği olur; böylece başka bir repodan gelen dosyaları değiştirmeden olduğu gibi kopyalayabilirsin. `file` alt klasör içerebilir (`oop-in-enterprise/quiz00.md`):
 
 ```json
 {
@@ -105,6 +106,8 @@ Yeni bir sınav eklemek için:
 ```
 
 3. `cargo test` çalıştır. `shipped_exams_are_valid` testi her sınavın uyarısız dönüştüğünü, tüm cevapların olduğunu, kimliğin ve soru sayısının katalogla aynı olduğunu ve göreli görsellerin klasörde bulunduğunu doğrular. Aynı test CI'da her push'ta çalışır.
+
+`oop-in-enterprise/` altındaki dosyalar `oop-in-enterprise` reposunun `exams` klasörüyle birebir aynıdır; güncellemek için klasörü üzerine kopyalamak yeterli.
 
 `ai-dev-final-00.md`, ders reposundaki [Exam00.md](https://github.com/buraksenyurt/ai-based-development-lecture/blob/main/Exam00.md) dosyasının kopyasıdır; konu ilerlemesi için her soruya `<!-- topics: ... -->` etiketi eklenmiştir.
 
@@ -135,8 +138,9 @@ Soru kökü: kod blokları, tablolar, görseller, "- I." öncülleri olabilir.
 | 1 | B |
 ````
 
-- Sorular `## Soru N` veya `## Question N` başlıklarıyla başlar. Şıklar `- A) ...` (ya da `- **A)** ...`) biçimindedir ve A'dan başlayıp sırayla gider.
-- Cevaplar `## Cevap Anahtarı` / `## Answer Key` tablosundan ya da soru içindeki `<!-- answer: B -->` yorumundan okunur. Ya tüm soruların cevabı olmalı ya da hiçbirinin.
+- Sorular `## Soru N` veya `## Question N` başlıklarıyla başlar. Şıklar A'dan başlayıp sırayla gider ve şu biçimlerden biriyle yazılabilir: `- A) ...`, `- **A)** ...`, `A) ...`, `A-) ...` ya da tek başına `A)` satırı ve altında bir kod bloğu (şıkların kod olduğu sorular için). Kod bloklarının girintisi korunur.
+- Cevaplar `## Cevap Anahtarı` / `## Answer Key` tablosundan ya da soru içindeki `<!-- answer: B -->` yorumundan okunur. Başlığı olmayan bir `| Soru | Doğru Cevap |` tablosu da cevap anahtarı sayılır. Ya tüm soruların cevabı olmalı ya da hiçbirinin.
+- Testin kimliği sırasıyla katalogdaki `id`'den, dosyadaki `<!-- id: ... -->` yorumundan ya da dosya adından gelir.
 - `<!-- topics: ... -->` konu etiketleri, `<!-- lock -->` şık sırasını korur. "Hepsi", "Yalnızca I ve II" gibi şıklarda sıra zaten otomatik korunur.
 - Açıklama şıklara harfle atıf yapıyorsa (`**A**` yanlış, çünkü ...) soruya `<!-- lock -->` ekle; aksi halde şıklar karıştırıldığında harfler tutmaz. Dönüştürücü bu durumda uyarı verir.
 - Dosya bir URL'den yüklendiğinde göreli görsel yolları (`./images/x.png`) dosyanın klasörüne göre çözülür.
