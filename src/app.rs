@@ -230,7 +230,7 @@ fn scroll_top() {
 }
 
 /// Links the instructor can share: `?quiz=<url>` or `?exam=<catalog id>`.
-fn url_param(name: &str) -> Option<String> {
+pub fn url_param(name: &str) -> Option<String> {
     let search = web_sys::window()?.location().search().ok()?;
     let params = web_sys::UrlSearchParams::new_with_str(&search).ok()?;
     params.get(name).filter(|u| !u.trim().is_empty())

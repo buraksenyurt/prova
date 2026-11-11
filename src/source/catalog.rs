@@ -26,6 +26,41 @@ pub struct CatalogEntry {
     pub file: String,
     #[serde(default)]
     pub questions: Option<usize>,
+    /// `beginner`, `intermediate` or `advanced`; see [`CatalogEntry::level`].
+    #[serde(default)]
+    pub level: Option<String>,
+    /// Estimated time to solve, in minutes.
+    #[serde(default)]
+    pub minutes: Option<u32>,
+    /// Exam-level tags. Use the same names as the questions' `topics` so
+    /// recommendations can match weak topics with exams.
+    #[serde(default)]
+    pub tags: Vec<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Level {
+    Beginner,
+    Intermediate,
+    Advanced,
+}
+
+impl Level {
+    pub const ALL: [Level; 3] = [Level::Beginner, Level::Intermediate, Level::Advanced];
+
+    pub fn key(self) -> &'static str {
+        match self {
+            Level::Beginner => "beginner",
+            Level::Intermediate => "intermediate",
+            Level::Advanced => "advanced",
+        }
+    }
+
+    pub fn from_key(key: &str) -> Option<Level> {
+        Level::ALL
+            .into_iter()
+            .find(|l| l.key() == key.trim().to_ascii_lowercase())
+    }
 }
 
 #[derive(Deserialize)]
@@ -38,6 +73,12 @@ pub fn parse_catalog(text: &str) -> Result<Vec<CatalogEntry>, SchemaError> {
 }
 
 impl CatalogEntry {
+    /// Unknown values are ignored here (and rejected by the catalog test), so
+    /// a typo never hides the whole catalog.
+    pub fn level(&self) -> Option<Level> {
+        self.level.as_deref().and_then(Level::from_key)
+    }
+
     /// URL of the exam file, resolved against the catalog URL.
     pub fn url(&self, catalog_url: &str) -> String {
         if self.file.contains("://") || self.file.starts_with('/') {
@@ -85,7 +126,11 @@ mod tests {
             description: None,
             file: "./a.md".into(),
             questions: None,
+            level: Some("Intermediate".into()),
+            minutes: None,
+            tags: vec![],
         };
+        assert_eq!(e.level(), Some(Level::Intermediate));
         assert_eq!(e.url("exams/catalog.json"), "exams/a.md");
         assert_eq!(e.url("catalog.json"), "a.md");
     }
@@ -102,6 +147,23 @@ mod tests {
         let mut ids = HashSet::new();
         for entry in &catalog {
             assert!(ids.insert(entry.id.clone()), "duplicate id {}", entry.id);
+            if let Some(l) = &entry.level {
+                assert!(
+                    Level::from_key(l).is_some(),
+                    "{}: unknown level {l:?} (beginner/intermediate/advanced)",
+                    entry.id
+                );
+            }
+            assert!(
+                entry.minutes.is_none_or(|m| m > 0),
+                "{}: minutes must be positive",
+                entry.id
+            );
+            assert!(
+                entry.tags.iter().all(|t| !t.trim().is_empty()),
+                "{}: empty tag",
+                entry.id
+            );
             let text = std::fs::read_to_string(format!("{root}{}", entry.file))
                 .unwrap_or_else(|e| panic!("{}: {e}", entry.file));
             // Exactly the path the app takes when a catalog card is clicked.

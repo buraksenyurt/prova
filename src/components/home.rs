@@ -2,15 +2,15 @@ use leptos::prelude::*;
 use wasm_bindgen::JsCast;
 use web_sys::{DragEvent, File, HtmlInputElement};
 
+use super::catalog::ExamBrowser;
 use crate::app::{sample_source, use_app};
 use crate::domain::Attempt;
 use crate::i18n::use_i18n;
-use crate::source::catalog::CATALOG_URL;
-use crate::source::{CatalogSource, FileSource, UrlSource};
+use crate::source::{FileSource, UrlSource};
 use crate::storage::{self, SavedQuiz};
 
 /// Unfinished attempt saved in the browser, together with its quiz.
-fn resumable() -> Option<(SavedQuiz, Attempt)> {
+pub fn resumable() -> Option<(SavedQuiz, Attempt)> {
     let attempt = storage::load_attempt().filter(|a| !a.is_finished())?;
     let quiz = storage::load_quiz()?;
     Some((quiz, attempt))
@@ -74,48 +74,57 @@ pub fn Home() -> impl IntoView {
                     })
             }}
 
-            <CatalogList />
+            {move || {
+                app.load_error
+                    .get()
+                    .map(|e| {
+                        view! {
+                            <div class="alert error" role="alert">
+                                {i18n.lang().load_error(&e)}
+                            </div>
+                        }
+                    })
+            }}
+            <Show when=move || app.loading.get()>
+                <p class="muted center">{move || i18n.t().loading}</p>
+            </Show>
 
-            <h2 class="section-title">{move || i18n.t().own_file_title}</h2>
-            <div class="card loader-card" class:busy=move || app.loading.get()>
-                <FileDrop on_file />
-                <div class="divider">
-                    <span>{move || i18n.t().or}</span>
-                </div>
-                <form class="url-form" on:submit=submit_url>
-                    <label class="visually-hidden" for="quiz-url">
-                        {move || i18n.t().url_label}
-                    </label>
-                    <input
-                        id="quiz-url"
-                        type="url"
-                        placeholder=move || i18n.t().url_placeholder
-                        prop:value=move || url.get()
-                        on:input=move |ev| url.set(event_target_value(&ev))
-                    />
-                    <button class="btn" type="submit">
-                        {move || i18n.t().url_button}
+            <ExamBrowser />
+
+            <details
+                class="own-file"
+                open=move || app.catalog.with(|c| c.as_ref().is_some_and(|c| c.is_empty()))
+            >
+                <summary>
+                    <span>{move || i18n.t().own_file_title}</span>
+                    <small class="muted">{move || i18n.t().own_file_hint}</small>
+                </summary>
+                <div class="card loader-card" class:busy=move || app.loading.get()>
+                    <FileDrop on_file />
+                    <div class="divider">
+                        <span>{move || i18n.t().or}</span>
+                    </div>
+                    <form class="url-form" on:submit=submit_url>
+                        <label class="visually-hidden" for="quiz-url">
+                            {move || i18n.t().url_label}
+                        </label>
+                        <input
+                            id="quiz-url"
+                            type="url"
+                            placeholder=move || i18n.t().url_placeholder
+                            prop:value=move || url.get()
+                            on:input=move |ev| url.set(event_target_value(&ev))
+                        />
+                        <button class="btn" type="submit">
+                            {move || i18n.t().url_button}
+                        </button>
+                    </form>
+                    <button class="btn link sample-btn" on:click=move |_| app.load(sample_source())>
+                        {move || i18n.t().sample_button}
+                        " →"
                     </button>
-                </form>
-                <button class="btn link sample-btn" on:click=move |_| app.load(sample_source())>
-                    {move || i18n.t().sample_button}
-                    " →"
-                </button>
-                <Show when=move || app.loading.get()>
-                    <p class="muted center">{move || i18n.t().loading}</p>
-                </Show>
-                {move || {
-                    app.load_error
-                        .get()
-                        .map(|e| {
-                            view! {
-                                <div class="alert error" role="alert">
-                                    {i18n.lang().load_error(&e)}
-                                </div>
-                            }
-                        })
-                }}
-            </div>
+                </div>
+            </details>
             <p class="muted center small">{move || i18n.t().privacy_note}</p>
         </section>
     }
@@ -164,64 +173,5 @@ fn FileDrop(on_file: Callback<File>) -> impl IntoView {
             <strong>{move || i18n.t().drop_title}</strong>
             <span class="muted">{move || i18n.t().drop_hint}</span>
         </label>
-    }
-}
-
-/// Exams shipped with the app.
-#[component]
-fn CatalogList() -> impl IntoView {
-    let i18n = use_i18n();
-    let app = use_app();
-    move || {
-        let list = app.catalog.get()?;
-        if list.is_empty() {
-            return None;
-        }
-        Some(view! {
-            <h2 class="section-title">{move || i18n.t().catalog_title}</h2>
-            <div class="catalog">
-                {list
-                    .into_iter()
-                    .map(|entry| {
-                        let history = storage::history(&entry.id);
-                        let last = history.iter().find(|h| !h.retry).map(|h| h.percent());
-                        let attempts = history.len();
-                        let count = entry.questions;
-                        let e = entry.clone();
-                        view! {
-                            <button
-                                class="card exam-card"
-                                disabled=move || app.loading.get()
-                                on:click=move |_| {
-                                    app.load(CatalogSource {
-                                        entry: e.clone(),
-                                        catalog_url: CATALOG_URL.into(),
-                                    })
-                                }
-                            >
-                                {entry.course.clone().map(|c| view! { <span class="exam-course">{c}</span> })}
-                                <strong class="exam-title">{entry.title.clone()}</strong>
-                                {entry
-                                    .description
-                                    .clone()
-                                    .map(|d| view! { <span class="muted exam-desc">{d}</span> })}
-                                <span class="exam-meta">
-                                    {count.map(|n| view! { <span class="pill">{move || i18n.lang().question_count(n)}</span> })}
-                                    {last
-                                        .map(|p| {
-                                            view! {
-                                                <span class="pill subtle">
-                                                    {move || i18n.lang().last_score(p, attempts)}
-                                                </span>
-                                            }
-                                        })}
-                                    <span class="exam-go">{move || i18n.t().start} " →"</span>
-                                </span>
-                            </button>
-                        }
-                    })
-                    .collect_view()}
-            </div>
-        })
     }
 }

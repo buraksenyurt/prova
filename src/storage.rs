@@ -4,6 +4,7 @@
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use web_sys::Storage;
 
+use crate::catalog_view::ViewState;
 use crate::domain::Attempt;
 pub use crate::domain::HistoryEntry;
 
@@ -12,6 +13,7 @@ pub const THEME: &str = "prova:theme";
 const LAST_QUIZ: &str = "prova:quiz";
 const ATTEMPT: &str = "prova:attempt";
 const HISTORY_PREFIX: &str = "prova:history:";
+const VIEW: &str = "prova:catalog-view";
 const HISTORY_LIMIT: usize = 10;
 
 fn storage() -> Option<Storage> {
@@ -80,4 +82,13 @@ pub fn push_history(quiz_id: &str, entry: HistoryEntry) {
     list.insert(0, entry);
     list.truncate(HISTORY_LIMIT);
     save(&format!("{HISTORY_PREFIX}{quiz_id}"), &list);
+}
+
+/// Home screen selection (course tab, filters, sort).
+pub fn load_view() -> Option<ViewState> {
+    load(VIEW)
+}
+
+pub fn save_view(v: &ViewState) {
+    save(VIEW, v);
 }

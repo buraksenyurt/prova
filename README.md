@@ -37,6 +37,7 @@ cargo test
 - **Olumsuz kök vurgusu:** soru kökündeki "değildir", "yanlıştır", "söylenemez", "NOT" gibi kelimeler otomatik olarak işaretlenir.
 - **Sonuç ekranı:** skor, doğru/yanlış/boş sayıları, süre, zayıftan güçlüye konu kırılımı, filtrelenebilir gözden geçirme listesi ve **yanlış ve boşları tekrar çöz** düğmesi.
 - **Kaldığı yerden devam:** deneme her değişiklikte `localStorage`'a yazılır, sayfa yenilense de kaybolmaz. Her testin son 10 denemesi saklanır.
+- **Sınav seçimi:** ana ekranda ders sekmeleri, arama (`/` kısayolu, Türkçe karakterlerden bağımsız), durum filtreleri (çözülmedi, devam ediyor, tamamlandı, %70 altı), etiket ve seviye filtresi, sıralama (önerilen, ada göre, soru sayısına göre). Seçim tarayıcıda hatırlanır. "Önerilen" sıralama önce yarım kalanları, sonra hiç çözülmemişleri, sonra %70 altında kalanları getirir.
 - **Konulara göre gelişim:** giriş ekranında her konunun son 5 tam denemedeki başarısı küçük grafiklerle, sonuç ekranında ise önceki denemeye göre değişim (▲/▼) gösterilir. "Tekrar çöz" denemeleri bu karşılaştırmaya katılmaz.
 - **Kod renklendirme ve formüller:** kod blokları highlight.js, `$...$` / `$$...$$` formüller KaTeX ile gösterilir. Kütüphaneler repoda (`assets/vendor`) durur ve yalnızca içerikte kod ya da formül varsa yüklenir; CDN'e bağımlılık yoktur.
 - **Klavye:** `A–H` / `1–9` şık seçer, `←` / `→` gezinir, `F` işaretler.
@@ -104,6 +105,15 @@ Yeni bir sınav eklemek için:
   "questions": 27
 }
 ```
+
+İsteğe bağlı alanlar ana ekrandaki filtreleri ve kartları besler:
+
+| Alan | Değer | Ne işe yarar? |
+|---|---|---|
+| `course` | Ders adı | Ana ekrandaki sekmeler. Aynı yazılan adlar aynı sekmede toplanır; `?course=<ad-slug>` linki o sekmeyi açar (ör. `?course=oop-in-enterprise`). |
+| `level` | `beginner`, `intermediate`, `advanced` | Seviye rozeti ve seviye filtresi. |
+| `minutes` | Pozitif tam sayı | Kartta tahmini süre (`~20 dk`). |
+| `tags` | Metin listesi | Etiket filtresi ve kart üzerindeki etiketler. Soruların `<!-- topics: -->` etiketleriyle **aynı adları** kullanırsan "Önerilen" sıralama, öğrencinin zayıf olduğu konuları içeren sınavları öne alır. |
 
 3. `cargo test` çalıştır. `shipped_exams_are_valid` testi her sınavın uyarısız dönüştüğünü, tüm cevapların olduğunu, kimliğin ve soru sayısının katalogla aynı olduğunu ve göreli görsellerin klasörde bulunduğunu doğrular. Aynı test CI'da her push'ta çalışır.
 
@@ -174,7 +184,8 @@ exams/            Uygulamayla gelen sınavlar ve catalog.json
 assets/
 ├── enhance.js    highlight.js ve KaTeX'i ihtiyaç anında yükleyip uygular
 └── vendor/       highlight.js 11.11.1 ve KaTeX 0.16.25 (lisanslarıyla)
-├── storage.rs    localStorage: devam eden deneme, son test, geçmiş
+├── catalog_view.rs  Ana ekran: sınav durumu, arama, filtre ve sıralama mantığı
+├── storage.rs    localStorage: devam eden deneme, son test, geçmiş, ana ekran seçimi
 ├── i18n.rs       TR/EN, eksik çeviri derleme hatası verir
 ├── app.rs        Uygulama durumu ve ekranlar arası akış
 └── components/   home, intro, runner, results, question, header

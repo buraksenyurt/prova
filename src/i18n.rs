@@ -6,9 +6,11 @@
 
 use leptos::prelude::*;
 
+use crate::catalog_view::{ExamStatus, SortKey, StatusFilter};
 use crate::convert::{ConvertError, Warning};
 use crate::dto::SchemaError;
 use crate::source::LoadError;
+use crate::source::catalog::Level;
 use crate::storage;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -197,6 +199,76 @@ impl Lang {
             (Lang::En, Warning::RelativeImages) => {
                 "Relative image paths but no base URL; images may not show. Load the file from a URL instead.".into()
             }
+        }
+    }
+
+    pub fn status_filter(self, f: StatusFilter) -> &'static str {
+        match (self, f) {
+            (Lang::Tr, StatusFilter::All) => "Hepsi",
+            (Lang::Tr, StatusFilter::NotStarted) => "Çözülmedi",
+            (Lang::Tr, StatusFilter::InProgress) => "Devam ediyor",
+            (Lang::Tr, StatusFilter::Completed) => "Tamamlandı",
+            (Lang::Tr, StatusFilter::BelowPass) => "%70 altı",
+            (Lang::En, StatusFilter::All) => "All",
+            (Lang::En, StatusFilter::NotStarted) => "Not started",
+            (Lang::En, StatusFilter::InProgress) => "In progress",
+            (Lang::En, StatusFilter::Completed) => "Completed",
+            (Lang::En, StatusFilter::BelowPass) => "Below 70%",
+        }
+    }
+
+    pub fn level(self, l: Level) -> &'static str {
+        match (self, l) {
+            (Lang::Tr, Level::Beginner) => "Başlangıç",
+            (Lang::Tr, Level::Intermediate) => "Orta",
+            (Lang::Tr, Level::Advanced) => "İleri",
+            (Lang::En, Level::Beginner) => "Beginner",
+            (Lang::En, Level::Intermediate) => "Intermediate",
+            (Lang::En, Level::Advanced) => "Advanced",
+        }
+    }
+
+    pub fn sort_name(self, k: SortKey) -> &'static str {
+        match (self, k) {
+            (Lang::Tr, SortKey::Recommended) => "Önerilen",
+            (Lang::Tr, SortKey::Title) => "Ada göre",
+            (Lang::Tr, SortKey::Questions) => "Soru sayısına göre",
+            (Lang::En, SortKey::Recommended) => "Recommended",
+            (Lang::En, SortKey::Title) => "By title",
+            (Lang::En, SortKey::Questions) => "By question count",
+        }
+    }
+
+    pub fn exam_count(self, n: usize) -> String {
+        match self {
+            Lang::Tr => format!("{n} sınav"),
+            Lang::En if n == 1 => "1 exam".into(),
+            Lang::En => format!("{n} exams"),
+        }
+    }
+
+    pub fn minutes_short(self, m: u32) -> String {
+        match self {
+            Lang::Tr => format!("~{m} dk"),
+            Lang::En => format!("~{m} min"),
+        }
+    }
+
+    pub fn exam_status(self, status: ExamStatus, attempts: usize) -> String {
+        match status {
+            ExamStatus::NotStarted => match self {
+                Lang::Tr => "Yeni".into(),
+                Lang::En => "New".into(),
+            },
+            ExamStatus::InProgress { answered, total } => match self {
+                Lang::Tr => format!("Devam ediyor · {answered}/{total}"),
+                Lang::En => format!("In progress · {answered}/{total}"),
+            },
+            ExamStatus::Completed { last } => self.last_score(last, attempts),
+            ExamStatus::Practiced => match self {
+                Lang::Tr => "Sadece tekrar çözüldü".into(),
+                Lang::En => "Only retries so far".into(),
+            },
         }
     }
 
@@ -415,6 +487,16 @@ pub struct Texts {
     pub vs_previous: &'static str,
     pub catalog_title: &'static str,
     pub own_file_title: &'static str,
+    pub all_courses: &'static str,
+    pub search_placeholder: &'static str,
+    pub tag_any: &'static str,
+    pub level_any: &'static str,
+    pub sort_label: &'static str,
+    pub clear_filters: &'static str,
+    pub no_results: &'static str,
+    pub continue_label: &'static str,
+    pub status_label: &'static str,
+    pub own_file_hint: &'static str,
 }
 
 const TR: Texts = Texts {
@@ -502,6 +584,16 @@ const TR: Texts = Texts {
     vs_previous: "Önceki denemeye göre",
     catalog_title: "Ders sınavları",
     own_file_title: "Kendi test dosyan",
+    all_courses: "Tümü",
+    search_placeholder: "Sınav ara… ( / )",
+    tag_any: "Tüm etiketler",
+    level_any: "Tüm seviyeler",
+    sort_label: "Sırala",
+    clear_filters: "Filtreleri temizle",
+    no_results: "Bu seçimle eşleşen sınav yok.",
+    continue_label: "Devam et",
+    status_label: "Durum",
+    own_file_hint: "JSON ya da Markdown test dosyası, URL veya örnek test",
 };
 
 const EN: Texts = Texts {
@@ -589,6 +681,16 @@ const EN: Texts = Texts {
     vs_previous: "Compared to the previous attempt",
     catalog_title: "Course exams",
     own_file_title: "Your own test file",
+    all_courses: "All",
+    search_placeholder: "Search exams… ( / )",
+    tag_any: "All tags",
+    level_any: "All levels",
+    sort_label: "Sort",
+    clear_filters: "Clear filters",
+    no_results: "No exams match this selection.",
+    continue_label: "Continue",
+    status_label: "Status",
+    own_file_hint: "JSON or Markdown test file, URL or the sample test",
 };
 
 /// Selected language, shared through context.

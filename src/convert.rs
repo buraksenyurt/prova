@@ -356,7 +356,7 @@ fn has_relative_image(text: &str) -> bool {
     })
 }
 
-fn slug(s: &str) -> String {
+pub fn slug(s: &str) -> String {
     let mut out = String::new();
     for c in s.to_lowercase().chars() {
         let c = match c {

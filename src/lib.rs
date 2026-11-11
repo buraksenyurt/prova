@@ -1,4 +1,5 @@
 pub mod app;
+pub mod catalog_view;
 pub mod components;
 pub mod convert;
 pub mod domain;

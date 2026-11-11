@@ -1,3 +1,4 @@
+pub mod catalog;
 pub mod header;
 pub mod home;
 pub mod intro;
