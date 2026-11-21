@@ -64,7 +64,7 @@ Hangileri doğrudur?
 > CAG'de bir uyarı daha: Bağlam çok uzadığında model ortadaki bilgiyi gözden kaçırabilir *(lost in the middle)*. "Sığıyor" ile "rahatça sığıyor" arasındaki fark bu yüzden önemlidir.
 
 ## Soru 3
-<!-- topics: MCP ve Ajanlar -->
+<!-- topics: MCP & Agents -->
 <!-- lock -->
 
 Bir ekip, log analizi yapan MCP sunucusunu şimdiye kadar her geliştiricinin kendi makinesinde **stdio** üzerinden çalıştırıyordu. Artık sunucunun kurum içi ağda **merkezi** olarak çalışmasını ve 40 geliştiricinin aynı sunucuyu kullanmasını istiyorlar. Bazı araçlar çok büyük raporları **parça parça** döndürüyor ve kullanıcıların uzun süren analizleri **iptal edebilmesi** gerekiyor.
@@ -83,7 +83,7 @@ Bu ihtiyaç için en doğru yaklaşım hangisidir?
 > Ancak araya ağ girdiği anda **kimlik doğrulama ve yetkilendirme** zorunlu hale gelir. "Kurum içi ağ" güvenli ağ demek değildir; aksi halde ağa erişebilen herkes bu sunucunun araçlarını çalıştırabilir. Log'lara erişen bir araç için bu ciddi bir veri sızıntısı riskidir (**C** yanlış).
 
 ## Soru 4
-<!-- topics: Skill ve Ajanlar -->
+<!-- topics: Skills & Agents -->
 <!-- lock -->
 
 Bir ekip sürüm notlarını standart bir biçimde hazırlatmak için bir **Skill** yazdı. Body kısmı çok detaylı: adımlar, şablon ve iyi/kötü örnekler var. Ancak ajana *"Bu sürümün notlarını hazırla"* dendiğinde skill hiç devreye girmiyor. Skill'in `SKILL.md` dosyasının başı şöyle:
@@ -116,7 +116,7 @@ En olası neden hangisidir?
 > - **D** yanlış: Referans dosyaları isteğe bağlıdır; tek bir `SKILL.md` geçerli bir skill'dir.
 
 ## Soru 5
-<!-- topics: Skill ve Ajanlar -->
+<!-- topics: Skills & Agents -->
 <!-- lock -->
 
 Bir ekip, sürüm çıkarma işini yapay zeka asistanına devretmek istiyor. Süreç `git`, `dotnet` ve `gh` komutlarıyla yürütülen **9 adımdan** oluşuyor. Adımların **sırası önemli** ve her adımdan sonra bir kontrol yapılması gerekiyor (örneğin testler geçmeden tag atılmamalı). Asistan bu CLI araçlarına zaten erişebiliyor; sorun, her seferinde adımları farklı sırayla yapması ya da bazı kontrolleri atlaması.
@@ -144,7 +144,7 @@ Bu ihtiyaç için en uygun yaklaşım hangisidir?
 > - **D** yanlış soruya cevap verir: Araçlara erişim zaten var.
 
 ## Soru 6
-<!-- topics: Döngü Mühendisliği -->
+<!-- topics: Loop Engineering -->
 <!-- lock -->
 
 Bir ajanı döngü içinde çalıştırmak için hedef tanımı yazılacak. Aşağıdaki hedeflerden hangisi döngü mühendisliği açısından **en iyi** tanımlanmıştır?
@@ -167,7 +167,7 @@ Bir ajanı döngü içinde çalıştırmak için hedef tanımı yazılacak. Aşa
 > - **D** ölçüt koymadığı gibi ajanın denetlenmeden üretim koduna dokunmasına izin verir ve insanı kritik kapıdan çıkarır. Dış döngü insanın kontrolünde kalmalıdır.
 
 ## Soru 7
-<!-- topics: Döngü Mühendisliği -->
+<!-- topics: Loop Engineering -->
 <!-- lock -->
 
 Bir ekip üç aydır her gece çalışan bir döngü kullanıyor. Döngü indirim hesaplama modülüne küçük değişiklikler yapıyor; testler hep yeşil, SonarQube raporu temiz. Ekip diff'leri okuyacak zamana sahip olduğu halde *"testler geçiyor, nasılsa doğru"* diyerek bir süredir değişikliklere bakmıyor. Bir müşteri hatası geldiğinde ekipten kimse modülün neden öyle davrandığını açıklayamıyor; kodun kendisi ise okunaklı ve iyi yapılandırılmış.
@@ -190,7 +190,7 @@ Bu durum en iyi hangi kavramla açıklanır?
 > Ödeme yolları: Döngünün ürettiğini düzenli okumak, ajana her değişikliğin gerekçesini açıklatmak ve küçük, açıklamalı diff'ler istemek. Kararların gerekçesini kalıcılaştırmak (ADR, `AGENTS.md`, skill'ler) ise yakın akrabası olan **niyet borcunu** *(Intent Debt)* önler.
 
 ## Soru 8
-<!-- topics: Gözlemlenebilirlik, Yapay Zeka Güvenliği -->
+<!-- topics: Observability, AI Security -->
 <!-- lock -->
 
 Bir geliştirici, VS Code Copilot'un token kullanımını izlemek için kendi makinesinde aşağıdaki kurulumu yaptı ve sorunsuz çalışıyor:
@@ -229,7 +229,7 @@ Ekip şimdi aynı kurulumu **ortak bir test sunucusunda** çalıştırıp tüm g
 > - **C** ve **D** yanlış: Telemetri bir taşıma ve gözlemleme mekanizmasıdır. Ne planla kısıtlanır ne de protokol (gRPC/HTTP) token hesabını değiştirir.
 
 ## Soru 9
-<!-- topics: Model Özelleştirme -->
+<!-- topics: Model Customization -->
 <!-- lock -->
 
 Bir öğrenci, 8 milyar parametreli bir modeli RunPod üzerinde **LoRA** ile kendi veri setiyle eğitti. Eğitim hatasız bitti ancak sonuç klasöründe yalnızca birkaç onlarca megabaytlık bir `adapter_model.safetensors` ve bir `adapter_config.json` görünce şaşırdı; ana model ise gigabaytlar boyutunda.
@@ -254,7 +254,7 @@ Bu durumla ilgili hangisi doğrudur?
 > - **D** yanlış: GGUF, LM Studio gibi llama.cpp tabanlı araçların istediği formattır. Derste LM Studio'da test etmek için bu dönüşümü yaptık; ama bu LoRA'nın değil, o aracın gereksinimidir.
 
 ## Soru 10
-<!-- topics: Yapay Zeka Güvenliği, MCP ve Ajanlar -->
+<!-- topics: AI Security, MCP & Agents -->
 <!-- lock -->
 
 Bir ekip, internetten bulduğu ve PDF özetleme aracı sunan bir MCP sunucusunu geliştirme ortamına ekledi. Sunucunun araç listesindeki tanımlardan biri şöyle:

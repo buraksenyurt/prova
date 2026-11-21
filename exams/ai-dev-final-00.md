@@ -10,7 +10,7 @@ Prova için konu etiketleri eklendi. Biçim kuralları için README'deki "Markdo
 Bu dokümanda final sınavına hazırlık için örnek sorular yer almaktadır.
 
 ## Soru 1
-<!-- topics: Test -->
+<!-- topics: Testing -->
 
 Yazılım projelerinde kodun beklediğimiz şekilde çalışmasını garanti altına almak için birçok test metodolojisi kullanılır. Bunlardan birisi de birim testlerdir *(Unit Test)*. Birim testleri, yazılımın en küçük parçalarını (örneğin fonksiyonlar veya metotlar) izole ederek test etmeye odaklanır. Bu testler, kodun belirli bir bölümünün doğru çalışıp çalışmadığını kontrol eder ve genellikle otomatikleştirilir.
 
@@ -22,7 +22,7 @@ Yazılım projelerinde kodun beklediğimiz şekilde çalışmasını garanti alt
 - D) Test Last Development (TLD)
 
 ## Soru 2
-<!-- topics: DevOps ve Araçlar -->
+<!-- topics: DevOps & Tooling -->
 
 Uygulamaların geliştirme ortamlarında ihtiyaç duyduğu birçok dış bağımlılık olabilir. Veritabanları, mesajlaşma sistemleri, üçüncü taraf API'ler gibi.
 
@@ -34,7 +34,7 @@ Geliştirmekte olduğunuz web uygulaması, bazı fiziki dosyaları Amazon S3 üz
 - D) SonarQube
 
 ## Soru 3
-<!-- topics: Kod Kalitesi -->
+<!-- topics: Code Quality -->
 
 Yazılım projelerinin yaşam döngüsü boyunca, kod kalitesini ve güvenliğini sağlamak için çeşitli araçlar kullanılır. Bu araçlar, kodun belirli standartlara uygun olup olmadığını kontrol eder, potansiyel hataları ve güvenlik açıklarını tespit eder. Örneğin SonarQube statik kod analizi yaparak kodun kalitesini ölçer ve raporlar. Kodun kalitesini ölçmek için kullanılan metriklerden birisi `Code Coverage` değeridir. Bu değer, testler tarafından çalıştırılan kodun yüzdesini ifade eder. Yüksek değerler daha iyi test edilmiş bir kod tabanına işaret eder.
 
@@ -46,7 +46,7 @@ Code Coverage değerini artırmak için şıklarda belirtilen stratejilerden han
 - D) Birim test senaryolarını genişletmek ve daha fazla test eklemek
 
 ## Soru 4
-<!-- topics: Mimari -->
+<!-- topics: Architecture -->
 
 Bir bayi otomasyon sisteminde yedek parça siparişleri anlık olarak çok yüksek hacimlere ulaşabileceği öngörülmektedir. Bu nedenle sistemin ölçeklenebilir *(Scalability)* olarak tasarlanması gerektiği belirlenmiş, stok yönetimi, sipariş yönetimi ve tedarikçi entegrasyonu gibi modüllerin birbirinden bağımsız dağıtılabilmesi *(Deployment)* ve yönetilebilmesi gerektiğine karar verilmiştir. `Richards & Ford`'un da belirttiği özelliklere göre, bu gereksinimler için aşağıdaki mimarilerden hangisi en yüksek test edilebilirlik ve ölçeklenebilirlik avantajına sahiptir?
 
@@ -56,7 +56,7 @@ Bir bayi otomasyon sisteminde yedek parça siparişleri anlık olarak çok yüks
 - D) Event-Driven Architecture
 
 ## Soru 5
-<!-- topics: Kod Kalitesi -->
+<!-- topics: Code Quality -->
 
 Aşağıdaki kod parçasını dikkatlice inceleyelim.
 
@@ -91,7 +91,7 @@ Statik kod tarayıcısı bu kodla ilgili bir ihlal tespit etmiştir. Sizce bu ih
 - D) Programda kullanılmayan gereksiz kodlar vardır *(Dead Code/ Unused Variables)*
 
 ## Soru 6
-<!-- topics: Kod Kalitesi -->
+<!-- topics: Code Quality -->
 
 Projede geliştirilen bir kod parçasını gözden geçirmeniz ve yorumlamanız isteniyor. Söz konusu kod parçası aşağıdaki gibidir.
 
@@ -129,7 +129,7 @@ Koda baktığınızda burnunuza kötü kokular *(Code Smells)* gelmektedir. Sizc
 - D) Yüksek düzeyde bilişsel kod karmaşıklığı içermektedir *(High Cognitive Complexity)*
 
 ## Soru 7
-<!-- topics: Kod Kalitesi -->
+<!-- topics: Code Quality -->
 
 Sisteme giriş yapan kullanıcılar kod tarafında aşağıdaki metot ile doğrulanmaktadır.
 
@@ -149,7 +149,7 @@ Program kodu CI/CD hattına alındıktan sonra çalışan statik kod tarayıcıs
 - D) Metod içerisinde beklenmedik çalışma zamanı istisnaları ele alınmamaktadır *(Unhandled Exception)*
 
 ## Soru 8
-<!-- topics: Kod Kalitesi -->
+<!-- topics: Code Quality -->
 
 Müşteri kayıtlarını sisteme ekleyen bir servis sınıfında aşağıdaki gibi bir metod yer almaktadır.
 
@@ -168,7 +168,7 @@ public void CreateCustomer(string firstName, string lastName, string email, stri
 - D) Hiçbir değişiklik yapmadan mevcut haliyle bırakmayı öneririm çünkü metodun parametre yapısı zaten yeterince açık ve anlaşılır
 
 ## Soru 9
-<!-- topics: Kod Kalitesi -->
+<!-- topics: Code Quality -->
 
 Çocuklara matematiği sevdirmek için geliştirilen bir eğitim uygulaması üzerinde kod kontrolü yapmakla görevlendirildiniz ve kodun bir parçasında daire alanının hesaplanması ile ilgili aşağıdaki gibi yazılmış olan metotla karşılaştınız. Ne var ki bu kod parçasında sizi rahatsız eden bir şey var. Sizce bu kod parçasında ne gibi bir sorun vardır?
 
@@ -185,7 +185,7 @@ public double CalculateCircleArea(double radius)
 - D) Daire alanı hesaplamasında kullanılan sayısal değer sihirli sayı *(Magic Number)* olarak kodun içerisine gömülmüştür. Bunun yerine bir sabit *(Constant)* ve hatta **Math.PI** enstrümanı kullanılarak kodun okunurluğunu artırıp bakımını kolaylaştırabiliriz.
 
 ## Soru 10
-<!-- topics: Yapay Zeka Destekli Geliştirme -->
+<!-- topics: AI-Assisted Development -->
 
 Yapay zeka dil modelleri *(LLM - Large Language Models)* çalıştığınız kurumun içeride kullandığı özel kodlama standartlarını, mimari kararları, geliştirme metodolojilerini veya iş akışlarını bilmez. Asistanın size doğru cevap verebilmesi için, sorduğunuz soruyla birlikte ilgili doküman parçalarının bağlama *(context)* dahil edilmesi gerektiğine karar verdiniz. Bu nedenle kullanıcı sorgusunu mevcut bilgi tabanından veriler getirerek zenginleştiren ve modeli bu özel bilgiyle besleyen bir metodolojide ilerlemeyi planlıyorsunuz. Aşağıdaki stratejilerden hangisini tercih edersiniz?
 
@@ -195,7 +195,7 @@ Yapay zeka dil modelleri *(LLM - Large Language Models)* çalıştığınız kur
 - D) Test Driven Development *(TDD)* yaklaşımını benimsemek ve modeli kullanıcı sorgusuyla birlikte ilgili doküman parçalarını da içeren test senaryolarıyla beslemek
 
 ## Soru 11
-<!-- topics: Yapay Zeka Destekli Geliştirme -->
+<!-- topics: AI-Assisted Development -->
 
 GitHub Copilot gibi bir yapay zeka asistanından uygulamada yer alan ürün yönetimi sınıfı ile ilgili olası tüm birim testleri *(Unit Test)* oluşturmasını istediniz. Asistan saniyeler içinde size yirmiden fazla test kodu üretti. Yapay zekanın bu kodu üretmesi sonrasında teknik borç yaratmamak adına bir yazılım mühendisinin izlemesi gereken en doğru yol hangisidir?
 
@@ -205,7 +205,7 @@ GitHub Copilot gibi bir yapay zeka asistanından uygulamada yer alan ürün yön
 - D) Sadece hata fırlatan testleri inceleyip, başarılı çalışan testleri gözden geçirmeden yayına almak.
 
 ## Soru 12
-<!-- topics: Yapay Zeka Destekli Geliştirme -->
+<!-- topics: AI-Assisted Development -->
 
 Komut satırında çalışan bir Copilot ajanı ile yepyeni bir .NET Solution yapısı kurduğunuzu düşünün. Çözümünüz `Hexagonal Architecture` prensiplerine uygun olarak tasarlanmış olsun. Veritabanı tarafında `PostgreSQL` kullanıyorsunuz ve O/RM *(Object Relational Mapper)* olarak da `Entity Framework Core` tercih ediyorsunuz. Mimari olarak kayıt altına alınmasını istediğiniz bazı kararlar var; bunları Claude Sonnet ile oluşturmaya karar verdiniz. `VS Code` arabiriminden şu prompt'u verdiniz: "Projeyi analiz et ve bu yapıya uygun `Architecture Decision Record (ADR)` dokümanlarını otomatik olarak oluştur."
 
@@ -217,7 +217,7 @@ Bir yapay zeka asistanının mimari karar dokümanları üretmesi ile ilgili ola
 - D) Sadece Python projeleri yapay zeka tarafından analiz edilebilir, .NET projelerinde böyle bir özellik yoktur.
 
 ## Soru 13
-<!-- topics: Yapay Zeka Destekli Geliştirme -->
+<!-- topics: AI-Assisted Development -->
 
 Yapay zeka destekli yazılım geliştirme süreçlerinde, geliştiricilerin yapay zeka asistanlarından gelen çıktıları dikkatlice inceleyip gerektiğinde müdahale ederek ilerlemeleri önemlidir. Bu süreçte kod güvenilirliği, teknik borç ve proje mimarisi gibi konulara dikkat etmek gerekmektedir. Bu bağlamda, Newtonsoft'un oldukça popüler olan Json kütüphanesini projenizde kullanmak istediğinizi düşünün. Projeyi `NuGet` paket yöneticisi ile sisteme ekledikten sonra şu prompt'u verdiniz: "Bu kütüphaneyi kullanarak bir JSON serileştirme ve deserileştirme işlemi gerçekleştiren örnek bir kod parçası oluştur." Ancak kodu çalıştırdığınızda yapay zeka asistanınızın aslında var olmayan, hatalı ve uydurma bilgilerle son derece mantıklı ve bir o kadar da kendinden emin bir şekilde kod ürettiğini gördünüz. Bu durum literatürde ne şekilde tanımlanır?
 
@@ -243,7 +243,7 @@ $$ \text{Similarity}(A, B) = \cos(\theta) = \frac{A \cdot B}{\|A\| \|B\|} $$
 - D) Manhattan Distance
 
 ## Soru 15
-<!-- topics: Yapay Zeka Kavramları -->
+<!-- topics: AI Concepts -->
 
 Veri bilimi ekibinin `Python` ve `PyTorch` kullanarak harika bir makine öğrenmesi modeli geliştirip ve eğittiğini düşünelim. Ne var ki ana sunucu altyapısı .NET ve Go tabanlı çalışıyor. Modeli `Python` bağımlılıklarıyla canlıya almak yerine dilden ve framework'ten bağımsız, optimize edilmiş bir formata dönüştürüp doğrudan C# içerisinden yüksek performansla çalıştırmak *(inferencing)* istiyorsunuz. Derin öğrenme modellerinin farklı framework'ler *(TensorFlow, PyTorch vb.)* ve programlama dilleri arasında taşınabilmesini sağlayan açık kaynaklı standart aşağıdakilerden hangisidir?
 
@@ -287,7 +287,7 @@ Tanımlı yapılandırma değerleri ve `RAG` mimarisinin çalışma prensiplerin
 - D) Hepsi
 
 ## Soru 17
-<!-- topics: MCP ve Ajanlar -->
+<!-- topics: MCP & Agents -->
 
 Aşağıda C# programlama dili ile yazılmış bir kod parçası yer almaktadır.
 
@@ -325,7 +325,7 @@ Sizce yukarıda belirtilen ifadelerden hangisi veya hangileri doğrudur?
 - D) Hepsi
 
 ## Soru 18
-<!-- topics: Yapay Zeka Kavramları -->
+<!-- topics: AI Concepts -->
 
 Aşağıdaki tabloda güncel yapay zeka teknikleri hakkında bazı bilgiler yer almaktadır.
 
@@ -359,7 +359,7 @@ Burada **?** (soru işareti) ile gösterilen bileşenle ilgili şıklarda belirt
 - D) Veriler arasındaki ilişkilerin bağlam *(context)* ve anlam *(semantics)* temelli olarak değerlendirilmesi için bu senaryoda **?** (soru işareti) ile gösterilen kısımda **fine tuning** işlemi gerçekleştirilir.
 
 ## Soru 20
-<!-- topics: MCP ve Ajanlar -->
+<!-- topics: MCP & Agents -->
 
 Çalışmakta olduğunuz yazılım şirketi, araç satışı gerçekleştiren uluslararası bir bayi otomasyon sistemine sahiptir. Müşteri modülünün eklemek istediği yeni bir özellik ile araçların aranması sırasında **yapay zeka destekli bir öneri sisteminin** devreye girmesi istenmektedir. Bu öneri sistemi, müşterilerin arama geçmişlerini, tercihlerini ve mevcut stok durumunu analiz ederek onlara en uygun araçları önermekle sorumlu olacaktır. Kullanıcıların ilgili arayüz üzerinden aşağıdaki gibi sorular sorması beklenmektedir;
 
@@ -379,7 +379,7 @@ Bu yeni özelliği geliştirirken aşağıdaki stratejilerden hangisini tercih e
 - D) İlgili müşterinin tüm profil verilerini ve o anki muhtemel uygun stok listesinin tamamını REST API üzerinden çekip, her istekte LLM bağlam penceresine *(context window)* **JSON** formatlı bir dosya şeklinde enjekte etmek *(prompt-stuffing)* ve anlık öneri üretmek.
 
 ## Soru 21
-<!-- topics: Yapay Zeka Güvenliği -->
+<!-- topics: AI Security -->
 
 Büyük bir e-ticaret şirketinin bulut tabanlı altyapı çözümleri *(Cloud Infrastructure)* ekibinde çalışan deneyimli bir geliştiricisiniz. Ekibiniz, sunucularda oluşan hataları otomatik olarak analiz edip çözen bir **Otonom DevOps Ajanı** üzerinde çalışıyor. Bu ajanın en önemli yetenekleri arasında; hata loglarını *(log files)* okumak, sorunun kaynağını belirlemek, çözüme yönelik **Python** veya **Bash** betikleri *(script)* üretip bu betikleri sistem üzerinde çalıştırıp problemi çözmek yer alıyor.
 
@@ -434,7 +434,7 @@ Büyük ölçekli kurumsal bir bilgi tabanında *"Şirketin 2026 yılında satı
 - D) **Vektör RAG** kullanılması, varlıklar arası durum geçişlerini ve yapısal şemaları doğrudan modellemek için en maliyetsiz ve uygun mimari seçimdir.
 
 ## Soru 25
-<!-- topics: Yapay Zeka Kavramları -->
+<!-- topics: AI Concepts -->
 
 Yapay zeka alanında kullanılan temel kavramlar katmanlarına ve işlevlerine göre ele alınabilir. Aşağıdaki tabloda bu iki ana grup arasındaki ilişkiler özetlenmektedir.
 
@@ -455,7 +455,7 @@ Geliştirmekte olduğunuz LLM tabanlı kodlama asistanını yakında canlı orta
 - D) Ma *(Multi-Agent)* ve Sy *(Synthetic)*
 
 ## Soru 26
-<!-- topics: Yapay Zeka Kavramları -->
+<!-- topics: AI Concepts -->
 
 25'inci soruda yer alan ana tabloyu tekrardan göz önüne alalım. Yeni senaryoda kullanıcıların komut satırından verdiği karmaşık talimatlara göre çeşitli işletim sistemi komutlarını çalıştıran, gerektiğinde harici API servis noktalarına bağlanıp veri çekebilen otonom bir asistan tasarladığınızı düşünün. Yazılımın sonraki sürümlerinde ise tek bir asistan yerine, her biri farklı uzmanlıklara sahip ve kendi aralarında da haberleşebilen bir dağıtık yapıya gitmeyi planlıyorsunuz. Bu asistanın mevcut durumda dış sistemlerle etkileşime girmesini sağlayan yetenek ve sonraki planlama düşünüldüğünde sistemin temelini şıklarda belirtilen hangi bileşenler oluşturur?
 
@@ -465,7 +465,7 @@ Geliştirmekte olduğunuz LLM tabanlı kodlama asistanını yakında canlı orta
 - D) Fc *(Function Call)* , Ag *(Agent)* ve Ma *(Multi-Agent)*
 
 ## Soru 27
-<!-- topics: Yapay Zeka Kavramları -->
+<!-- topics: AI Concepts -->
 
 25'inci soruda yer alan ana tabloyu tekrardan göz önüne alalım. Yeni senaryonun sahibi bir hukuk bürosu. Büronun binlerce sayfadan oluşan dava dosyalarını ve içtihat metinlerini yapay zeka aracılığıyla sorgulayabilen bir sistem tasarlandığını düşünün. Belgeler çok uzun ve LLM'in bağlam penceresinin *(Context Window)* boyutlarına da sığmıyor. Sorunu çözmek için yazılım geliştirme ekibi; metinleri anlamsal matematiksel temsillere dönüştürüp özel bir veritabanında saklamaya ve kullanıcı soru sorduğunda en alakalı bilgi parçalarını bu veritabanından çekip modele göndermeye karar veriyor.
 

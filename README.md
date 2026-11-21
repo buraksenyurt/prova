@@ -27,6 +27,7 @@ cargo test
   - Final örnek soruları, 27 soru: `?exam=ai-dev-final-00`
   - Senaryo Soruları I, 10 açıklamalı senaryo sorusu (RAG, MCP, Skill, döngü mühendisliği, LoRA, güvenlik): `?exam=ai-dev-practice-01`
 - **OOP in Enterprise sınavları:** C# ağırlıklı dört set; OOP temelleri (`oop-00`), SOLID ve kod kalitesi (`oop-01`), veri yapıları ve algoritma performansı (`oop-02`), Dependency Injection (`oop-03`).
+- **Java sınavları:** SOLID ilkeleri ve tasarım kalıpları (Strategy, State, Chain of Responsibility, Decorator, Adapter, Command), Java 21, 20 soru (`java-00`).
 - **Yükleme:** JSON test dosyasını veya [Markdown ile yazılmış bir sınavı](#markdown-ile-sınav-yazmak) sürükle-bırak veya seç, bir adresten yükle ya da gömülü örnek testi dene.
 - **Paylaşılabilir link:** `https://buraksenyurt.github.io/prova/?quiz=<adres>` testi açılışta otomatik yükler. Raw GitHub veya gist adresleri CORS'a izin verdiği için doğrudan çalışır; GitHub'daki `.../blob/...` sayfa linki de otomatik olarak raw adrese çevrilir.
 - **İki mod**
@@ -113,7 +114,7 @@ Yeni bir sınav eklemek için:
 | `course` | Ders adı | Ana ekrandaki sekmeler. Aynı yazılan adlar aynı sekmede toplanır; `?course=<ad-slug>` linki o sekmeyi açar (ör. `?course=oop-in-enterprise`). |
 | `level` | `beginner`, `intermediate`, `advanced` | Seviye rozeti ve seviye filtresi. |
 | `minutes` | Pozitif tam sayı | Kartta tahmini süre (`~20 dk`). |
-| `tags` | Metin listesi | Etiket filtresi ve kart üzerindeki etiketler. Soruların `<!-- topics: -->` etiketleriyle **aynı adları** kullanırsan "Önerilen" sıralama, öğrencinin zayıf olduğu konuları içeren sınavları öne alır. |
+| `tags` | Metin listesi | Etiket filtresi ve kart üzerindeki etiketler. Etiketler ve konular İngilizce yazılır (`Code Quality`, `Design Patterns`, `AI Security` gibi). Soruların `<!-- topics: -->` etiketleriyle **aynı adları** kullanırsan "Önerilen" sıralama, öğrencinin zayıf olduğu konuları içeren sınavları öne alır. |
 
 3. `cargo test` çalıştır. `shipped_exams_are_valid` testi her sınavın uyarısız dönüştüğünü, tüm cevapların olduğunu, kimliğin ve soru sayısının katalogla aynı olduğunu ve göreli görsellerin klasörde bulunduğunu doğrular. Aynı test CI'da her push'ta çalışır.
 
@@ -140,7 +141,7 @@ Soru kökü: kod blokları, tablolar, görseller, "- I." öncülleri olabilir.
 
 > Açıklama: İsteğe bağlı; şıklardan sonra '>' ile.
 
-<!-- topics: RAG, Test -->
+<!-- topics: RAG, Testing -->
 
 ## Cevap Anahtarı
 | Soru No | Doğru Cevap |

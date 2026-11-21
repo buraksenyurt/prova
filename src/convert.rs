@@ -356,6 +356,16 @@ fn has_relative_image(text: &str) -> bool {
     })
 }
 
+/// Titles are shown as plain text, so `*emphasis*` and `` `code` `` markers go.
+fn plain_title(s: &str) -> String {
+    s.chars()
+        .filter(|c| !matches!(c, '*' | '`'))
+        .collect::<String>()
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 pub fn slug(s: &str) -> String {
     let mut out = String::new();
     for c in s.to_lowercase().chars() {
@@ -553,7 +563,12 @@ pub fn exam_markdown_to_json(text: &str, opts: &ConvertOptions) -> Result<Conver
     }
     let mut warnings = Vec::new();
 
-    let title = match parsed.title {
+    let title = match parsed
+        .title
+        .as_deref()
+        .map(plain_title)
+        .filter(|t| !t.is_empty())
+    {
         Some(t) => t,
         None => {
             warnings.push(Warning::NoTitle);
@@ -885,6 +900,13 @@ Hangileri doğrudur?
         assert_eq!(option_line("C# bir dildir"), None);
         assert!(is_key_table_header("| **Soru No** | **Doğru Cevap** |"));
         assert!(!is_key_table_header("| Kavram | Tanım |"));
+    }
+
+    #[test]
+    fn title_markdown_is_removed() {
+        let md = "# Alıştırma 00 *(SOLID ve `Java`)*\n## Soru 1\nS\n- A) a\n- B) b\n";
+        let p = dto::parse(&convert(md).json).unwrap();
+        assert_eq!(p.quiz.title, "Alıştırma 00 (SOLID ve Java)");
     }
 
     #[test]
