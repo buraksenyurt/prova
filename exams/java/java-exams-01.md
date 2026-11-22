@@ -36,7 +36,7 @@ public class Product {
 }
 ```
 
-Depo görevlisinin girdiği **40_000** adetlik stok bilgisi aşağıdaki kod ile nesneye nesne örneğine aktarılmaktadır.
+Depo görevlisinin girdiği **40_000** adetlik stok bilgisi aşağıdaki kod ile nesne örneğine aktarılmaktadır.
 
 ```java
 Product product = new Product();
@@ -254,7 +254,7 @@ Sizce bu kod ile ilgili olarak aşağıdaki ifadelerden hangisi doğrudur?
 
 ## Soru 8
 
-Northwind sistemindeki müşteri kimlikleri *(Identity)* beş harften oluşmaktadır. Geçerli bir kimlik bilgisinden söz edebilmek için de uyulması gereken bir kural vardır. Bu kural aşağıda tasarımı görülüne bir **typed identity** türü ile korunmaktadır.
+Northwind sistemindeki müşteri kimlikleri *(Identity)* beş harften oluşmaktadır. Geçerli bir kimlik bilgisinden söz edebilmek için de uyulması gereken bir kural vardır. Bu kural aşağıda tasarımı görülen bir **typed identity** türü ile korunmaktadır.
 
 ```java
 public record CustomerId(String value) {
