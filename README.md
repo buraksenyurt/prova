@@ -27,7 +27,7 @@ cargo test
   - Final örnek soruları, 27 soru: `?exam=ai-dev-final-00`
   - Senaryo Soruları I, 10 açıklamalı senaryo sorusu (RAG, MCP, Skill, döngü mühendisliği, LoRA, güvenlik): `?exam=ai-dev-practice-01`
 - **OOP in Enterprise sınavları:** C# ağırlıklı dört set; OOP temelleri (`oop-00`), SOLID ve kod kalitesi (`oop-01`), veri yapıları ve algoritma performansı (`oop-02`), Dependency Injection (`oop-03`).
-- **Java sınavları:** SOLID ilkeleri ve tasarım kalıpları (Strategy, State, Chain of Responsibility, Decorator, Adapter, Command), Java 21, 20 soru (`java-00`).
+- **Java sınavları:** SOLID ilkeleri ve tasarım kalıpları (`java-00`); value object, aggregate, parasal hesaplamalar, Stream API, domain event'ler, transaction ve persistence (`java-01`). Java 21, 20'şer soru.
 - **Yükleme:** JSON test dosyasını veya [Markdown ile yazılmış bir sınavı](#markdown-ile-sınav-yazmak) sürükle-bırak veya seç, bir adresten yükle ya da gömülü örnek testi dene.
 - **Paylaşılabilir link:** `https://buraksenyurt.github.io/prova/?quiz=<adres>` testi açılışta otomatik yükler. Raw GitHub veya gist adresleri CORS'a izin verdiği için doğrudan çalışır; GitHub'daki `.../blob/...` sayfa linki de otomatik olarak raw adrese çevrilir.
 - **İki mod**

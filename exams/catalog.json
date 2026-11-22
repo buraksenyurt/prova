@@ -110,6 +110,23 @@
         "SOLID",
         "Design Patterns"
       ]
+    },
+    {
+      "id": "java-01",
+      "title": "Java Patterns and Practices",
+      "course": "Java",
+      "description": "Value object, entity ve aggregate tasarımı, BigDecimal ile parasal hesaplamalar, Optional ve Stream API, Specification deseni, domain event'ler, transaction yönetimi ve persistence üzerine Java 21 ile 20 soru.",
+      "file": "java/java-exams-01.md",
+      "questions": 20,
+      "level": "advanced",
+      "minutes": 45,
+      "tags": [
+        "Java",
+        "Domain-Driven Design",
+        "Persistence",
+        "Stream API",
+        "Architecture"
+      ]
     }
   ]
 }
