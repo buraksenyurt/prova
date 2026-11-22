@@ -120,7 +120,7 @@ Yeni bir sınav eklemek için:
 
 `oop-in-enterprise/` altındaki dosyalar `oop-in-enterprise` reposunun `exams` klasörüyle birebir aynıdır; güncellemek için klasörü üzerine kopyalamak yeterli.
 
-`ai-dev-final-00.md`, ders reposundaki [Exam00.md](https://github.com/buraksenyurt/ai-based-development-lecture/blob/main/Exam00.md) dosyasının kopyasıdır; konu ilerlemesi için her soruya `<!-- topics: ... -->` etiketi eklenmiştir.
+`ai-dev-final-00.md`, ders reposundaki [Exam00.md](https://github.com/buraksenyurt/ai-based-development-lecture/blob/main/Exam00.md) dosyasının kopyasıdır; konu ilerlemesi için her soruya `<!-- topics: ... -->` etiketi eklenmiş, Soru 25'teki tablo Soru 26 ve 27'ye de konmuştur (sorular sıra karıştırıldığında ya da tek başına tekrar çözüldüğünde de anlaşılır olsun diye).
 
 ## Markdown ile sınav yazmak
 

@@ -39,22 +39,26 @@ Bu sınıf JSON dönüşümü, verinin temizlenmesi *(trim)*, doğrulama *(valid
 
 ## Soru 2
 
-Aşağıdaki doğrulama metodu bir önceki sorudaki controller sınıfından alınmıştır.
+Bir e-ticaret sisteminin müşteri kayıt modülünde **CustomerRegistrationService** sınıfı, kayıt öncesinde müşteri bilgilerini aşağıdaki metot ile kontrol etmektedir.
 
 ```java
-private boolean isValidSubscriber(Subscriber subscriber) {
-    if (!isExist(subscriber.getName())) {
+private boolean isValidCustomer(Customer customer) {
+    if (customer.getName() == null || customer.getName().isBlank()) {
         return false;
     }
-    subscriber.setName(subscriber.getName().trim());
-    if (!isValidAlphaNumeric(subscriber.getName())) {
+    customer.setName(customer.getName().trim());
+    if (!isValidAlphaNumeric(customer.getName())) {
         return false;
     }
-    if (subscriber.getEmail() == null || subscriber.getEmail().trim().length() == 0) {
+    if (customer.getEmail() == null || customer.getEmail().trim().length() == 0) {
         return false;
     }
-    subscriber.setEmail(subscriber.getEmail().trim());
-    return isValidEmail(subscriber.getEmail());
+    customer.setEmail(customer.getEmail().trim());
+    return isValidEmail(customer.getEmail());
+}
+
+private boolean isValidEmail(String value) {
+    return Pattern.compile("^[\\w.+-]+@[\\w-]+\\.[\\w.]+$").matcher(value).matches();
 }
 ```
 
@@ -62,7 +66,7 @@ Bu metodu tasarım açısından değerlendirdiğinizde dikkat çeken en kritik s
 
 - A) Metot adı doğrulama yaptığını söylese de **setName** ve **setEmail** çağrıları ile nesne verisini değiştirmektedir *(side effect)*. Verinin temizlenmesi *(normalization)* ve doğrulanması *(validation)* iki ayrı sorumluluktur ve doğrulama yapan kodun yan etkisinin olmaMAsı beklenir.
 - B) **Pattern.compile** çağrısı metot her çalıştığında tekrarlandığı için kod derlenmez.
-- C) Metot **private** tanımlandığı için **Subscriber** nesnesinin setter metotlarına erişemez.
+- C) Metot **private** tanımlandığı için **Customer** nesnesinin setter metotlarına erişemez.
 - D) Java'da **boolean** dönen metotlar içinde birden fazla **return** ifadesi kullanılamaz.
 
 ## Soru 3
@@ -108,53 +112,65 @@ Sizce hangi ifade/ifadeler doğrudur?
 
 ## Soru 4
 
-Bir önceki sorudaki problemi çözmek için aşağıdaki gibi bir soyut sınıf tasarlanmıştır.
+Bir raporlama modülünde farklı formatlarda *(PDF, Excel, CSV)* rapor üretilmektedir. Tüm formatlarda raporun verisi aynı şekilde yüklenip filtrelenmekte, yalnızca çıktının oluşturulma biçimi değişmektedir. Bu amaçla aşağıdaki soyut sınıf tasarlanmıştır.
 
 ```java
-public abstract class Subscriber {
-    protected Long subscriberId;
+public abstract class ReportExporter {
+    protected final ReportRepository repository;
 
-    public final double calculateAiCredit() {
-        long totalTokens = SessionHistory.getCurrentContexts(subscriberId).stream()
-                .mapToLong(SessionHistory.Context::getContextTokens)
-                .sum();
-        return calculateCredit(totalTokens);
+    protected ReportExporter(ReportRepository repository) {
+        this.repository = repository;
     }
 
-    protected abstract double calculateCredit(long totalTokens);
+    public final byte[] export(ReportQuery query) {
+        List<ReportRow> rows = repository.load(query).stream()
+                .filter(ReportRow::isVisible)
+                .toList();
+        return render(rows);
+    }
+
+    protected abstract byte[] render(List<ReportRow> rows);
 }
 
-public class ClaudeSubscriber extends Subscriber {
+public class CsvReportExporter extends ReportExporter {
+    public CsvReportExporter(ReportRepository repository) { super(repository); }
+
     @Override
-    protected double calculateCredit(long totalTokens) {
-        return totalTokens * 0.003;
+    protected byte[] render(List<ReportRow> rows) {
+        return rows.stream()
+                .map(ReportRow::toCsvLine)
+                .collect(Collectors.joining("\n"))
+                .getBytes(StandardCharsets.UTF_8);
     }
 }
 ```
 
-**calculateAiCredit** metodunda kullanılan **final** anahtar kelimesinin amacı ve bu yapının bilinen adı için aşağıdaki ifadelerden hangisi doğrudur?
+**export** metodunda kullanılan **final** anahtar kelimesinin amacı ve bu yapının bilinen adı için aşağıdaki ifadelerden hangisi doğrudur?
 
 - A) **final**, metodun dönüş değerinin bir kez hesaplandıktan sonra değişmeyeceğini belirtir. **Singleton** kalıbı kullanılmıştır.
-- B) **final**, **Subscriber** sınıfından kalıtım yapılmasını engeller. **Factory Method** kalıbı kullanılmıştır.
+- B) **final**, **ReportExporter** sınıfından kalıtım yapılmasını engeller. **Factory Method** kalıbı kullanılmıştır.
 - C) **final**, metodun sonucunu ilk çağrıdan sonra önbelleğe *(cache)* alır. **Decorator** kalıbı kullanılmıştır.
-- D) **final**, alt sınıfların ortak akışı *(token toplama + hesaplama)* ezmesini *(override)* engeller. Değişen adım ise **protected abstract** metot ile alt sınıflara bırakılır. **Template Method** kalıbı kullanılmıştır.
+- D) **final**, alt sınıfların ortak akışı *(veriyi yükleme + filtreleme + çıktı üretme)* ezmesini *(override)* engeller. Değişen adım ise **protected abstract** metot ile alt sınıflara bırakılır. **Template Method** kalıbı kullanılmıştır.
 
 ## Soru 5
 
-Üçüncü soruda aşağıdaki gibi bir söz dizimi *(syntax)* kullanılmaktadır.
+Bir bildirim servisinde **Object** türünden gelen mesaj nesnesinin tipine göre farklı işlem yapmak için aşağıdaki gibi bir söz dizimi *(syntax)* kullanılmaktadır.
 
 ```java
-if (subscriber instanceof ClaudeSubscriber claude) {
-    return claude.calculateAiCredit();
+public String describe(Object message) {
+    if (message instanceof EmailMessage email) {
+        return "E-posta: " + email.subject();
+    }
+    return "Bilinmeyen mesaj";
 }
 ```
 
 Bu söz dizimi ile ilgili aşağıdaki ifadeler ortaya atılmıştır:
 
-- **I.** Tip kontrolü ve tip dönüşümü *(cast)* tek adımda yapılır. Ayrıca `(ClaudeSubscriber) subscriber` şeklinde bir dönüşüm yazmaya gerek kalmaz.
-- **II.** **claude** değişkeni yalnızca koşulun **true** olduğu kapsamda *(scope)* kullanılabilir.
+- **I.** Tip kontrolü ve tip dönüşümü *(cast)* tek adımda yapılır. Ayrıca `(EmailMessage) message` şeklinde bir dönüşüm yazmaya gerek kalmaz.
+- **II.** **email** değişkeni yalnızca koşulun **true** olduğu kapsamda *(scope)* kullanılabilir.
 - **III.** Bu söz dizimi **Java 8** sürümünden beri dilde yer almaktadır.
-- **IV.** **subscriber** değişkeni **null** ise bu ifade **NullPointerException** fırlatır.
+- **IV.** **message** değişkeni **null** ise bu ifade **NullPointerException** fırlatır.
 
 Sizce hangi ifade/ifadeler doğrudur?
 
@@ -353,24 +369,31 @@ public class DataInspectorService extends JsonFormatter {
 
 ## Soru 10
 
-Dokuzuncu sorunun doğru cevabındaki tasarımın kullanıldığını ve **Formatter** arayüzünün `@FunctionalInterface` notasyonu *(annotation)* **içermediğini** varsayalım. **throws IOException** bildirimi olan bir test metodunda aşağıdaki kod parçası çalıştırılıyor olsun. **Data** sınıfının yapıcısı *(constructor)* `Data(int id, String content)` şeklindedir.
+Bir uygulamada kullanıcılara gösterilecek karşılama mesajları aşağıdaki arayüz ile üretilmektedir. Arayüzde `@FunctionalInterface` notasyonu *(annotation)* **bulunmamaktadır**. **User** ise `record User(int id, String name)` şeklinde tanımlanmış bir **record** türüdür.
 
 ```java
-Formatter formatter = d -> "id=" + d.getId();
-DataInspectorService service = new DataInspectorService(formatter);
+public interface Greeter {
+    String greet(User user);
+}
+```
+
+**throws IOException** bildirimi olan bir test metodunda aşağıdaki kod parçası çalıştırılıyor olsun.
+
+```java
+Greeter greeter = u -> "Merhaba " + u.name();
 
 StringWriter out = new StringWriter();
-service.writeData(new Data(7, "hello"), out);
+out.write(greeter.greet(new User(7, "Ada")));
 
 System.out.println(out.toString().strip());
 ```
 
 Sizce bu kodun çıktısı ne olur?
 
-- A) Kod derlenmez zira **Formatter** arayüzünde `@FunctionalInterface` notasyonu olmadığından lambda ifadesi atanamaz.
-- B) `id=7`
-- C) `{ "id": 7, "content": "hello" }`
-- D) Çalışma zamanında **IOException** fırlatılır. Çünkü yazılacak bir dosya yolu verilmemiştir.
+- A) Kod derlenmez zira **Greeter** arayüzünde `@FunctionalInterface` notasyonu olmadığından lambda ifadesi atanamaz.
+- B) `Merhaba Ada`
+- C) `Merhaba User[id=7, name=Ada]`
+- D) Kod derlenmez, çünkü lambda ifadeleri yalnızca **java.util.function** paketindeki arayüzlere atanabilir.
 
 ## Soru 11
 
@@ -447,45 +470,49 @@ public interface ShippingStrategy {
 
 ## Soru 13
 
-Bir önceki sorudaki tasarımın **context** sınıfı aşağıdaki gibidir.
+Bir e-ticaret sitesinde müşteri seviyesine *(BRONZE, SILVER, GOLD)* göre indirim uygulanmaktadır. İndirim kuralları **DiscountPolicy** arayüzünü uygulayan sınıflarda tutulmakta ve aşağıdaki **DiscountCalculator** sınıfı tarafından kullanılmaktadır.
 
 ```java
-public class ShippingCostCalculator {
-    private final Map<DeliveryType, ShippingStrategy> strategies = new EnumMap<>(DeliveryType.class);
+@FunctionalInterface
+public interface DiscountPolicy {
+    double discount(Order order);
+}
 
-    public ShippingCostCalculator() {
-        strategies.put(DeliveryType.STANDARD, new StandardShipping());
-        strategies.put(DeliveryType.EXPRESS, new ExpressShipping());
-        strategies.put(DeliveryType.PICKUP_POINT, new PickupPointShipping());
-        strategies.put(DeliveryType.SAME_DAY, new SameDayShipping());
+public class DiscountCalculator {
+    private final Map<CustomerTier, DiscountPolicy> policies = new EnumMap<>(CustomerTier.class);
+
+    public DiscountCalculator() {
+        policies.put(CustomerTier.BRONZE, new BronzeDiscount());
+        policies.put(CustomerTier.SILVER, new SilverDiscount());
+        policies.put(CustomerTier.GOLD, new GoldDiscount());
     }
 
-    public void register(DeliveryType type, ShippingStrategy strategy) {
-        strategies.put(type, strategy);
+    public void register(CustomerTier tier, DiscountPolicy policy) {
+        policies.put(tier, policy);
     }
 
-    public double calculate(Shipment shipment, DeliveryType type) {
-        ShippingStrategy strategy = strategies.get(type);
-        if (strategy == null) {
-            throw new IllegalArgumentException("Bilinmeyen teslimat tipi: " + type);
+    public double calculate(Order order, CustomerTier tier) {
+        DiscountPolicy policy = policies.get(tier);
+        if (policy == null) {
+            throw new IllegalArgumentException("Bilinmeyen müşteri seviyesi: " + tier);
         }
-        return Math.round(strategy.calculate(shipment) * 100) / 100.0;
+        return Math.round(policy.discount(order) * 100) / 100.0;
     }
 }
 ```
 
-Kampanya döneminde ekspres kargonun ücretsiz olması istendiği için aşağıdaki satır çalıştırılmıştır.
+Kampanya döneminde **GOLD** müşterilere indirim uygulanmaması istendiği için aşağıdaki satır çalıştırılmıştır.
 
 ```java
-calculator.register(DeliveryType.EXPRESS, shipment -> 0.0);
+calculator.register(CustomerTier.GOLD, order -> 0.0);
 ```
 
 Eklenen bu yeni kod parçası ile ilgili aşağıdaki ifadeler ortaya atılmıştır.
 
-- **I.** **ShippingStrategy** tek bir soyut metoda sahip olduğundan, yeni bir sınıf yazmadan lambda ifadesi ile strateji verilebilir.
+- **I.** **DiscountPolicy** tek bir soyut metoda sahip olduğundan, yeni bir sınıf yazmadan lambda ifadesi ile politika verilebilir.
 - **II.** **EnumMap** yalnızca belirtilen enum türünün sabitlerini anahtar olarak kabul eden, enum için optimize edilmiş bir **Map** implementasyonudur.
-- **III.** **register** çağrısından sonra **EXPRESS** tipi için **calculate** metodu **0.0** döner. Çünkü mevcut strateji yenisi ile değiştirilmiştir.
-- **IV.** İleride **NIGHT_DELIVERY** gibi yeni bir teslimat tipi eklemek için **calculate** metoduna yeni bir **case** eklenmesi zorunludur.
+- **III.** **register** çağrısından sonra **GOLD** seviyesi için **calculate** metodu **0.0** döner. Çünkü mevcut politika yenisi ile değiştirilmiştir.
+- **IV.** İleride **PLATINUM** gibi yeni bir müşteri seviyesi eklemek için **calculate** metoduna yeni bir **case** eklenmesi zorunludur.
 
 Sizce bu ifadelerden hangisi/hangileri doğrudur?
 
@@ -507,65 +534,65 @@ Sizce bu senaryo için en uygun tasarım kalıbı hangisidir?
 
 ## Soru 15
 
-Bir önceki senaryo **State** kalıbı ile aşağıdaki gibi yeniden tasarlanmıştır *(kodun sadece ilgili kısımları verilmiştir)*.
+Bir destek talebi *(ticket)* sisteminde taleplerin yaşam döngüsü **OPEN -> ASSIGNED -> RESOLVED -> CLOSED** şeklindedir ve bazı aşamalarda talep **CANCELLED** durumuna geçebilmektedir. Her durum ayrı bir sınıf olarak aşağıdaki gibi modellenmiştir *(kodun sadece ilgili kısımları verilmiştir)*.
 
 ```java
-public interface OrderState {
+public interface TicketState {
     String name();
-    default void pay(Order order)     { throw invalid("ödenemez"); }
-    default void ship(Order order)    { throw invalid("kargoya verilemez"); }
-    default void deliver(Order order) { throw invalid("teslim edilemez"); }
-    default void cancel(Order order)  { throw invalid("iptal edilemez"); }
+    default void assign(Ticket ticket)  { throw invalid("atanamaz"); }
+    default void resolve(Ticket ticket) { throw invalid("çözüldü olarak işaretlenemez"); }
+    default void close(Ticket ticket)   { throw invalid("kapatılamaz"); }
+    default void cancel(Ticket ticket)  { throw invalid("iptal edilemez"); }
 
     private IllegalStateException invalid(String action) {
-        return new IllegalStateException(name() + " durumundaki sipariş " + action);
+        return new IllegalStateException(name() + " durumundaki talep " + action);
     }
 }
 
-final class PaidState implements OrderState {
-    public String name() { return "PAID"; }
-    public void ship(Order order)   { order.transitionTo(new ShippedState(), "Kargoya verildi"); }
-    public void cancel(Order order) { order.transitionTo(new CancelledState(), "İptal edildi, ödeme iadesi başlatıldı"); }
+final class AssignedState implements TicketState {
+    public String name() { return "ASSIGNED"; }
+    public void resolve(Ticket ticket) { ticket.transitionTo(new ResolvedState(), "Çözüldü"); }
+    public void cancel(Ticket ticket)  { ticket.transitionTo(new CancelledState(), "İptal edildi, müşteriye bilgi verildi"); }
 }
 
-final class ShippedState implements OrderState {
-    public String name() { return "SHIPPED"; }
-    public void deliver(Order order) { order.transitionTo(new DeliveredState(), "Teslim edildi"); }
-    public void cancel(Order order) {
-        throw new IllegalStateException("Kargodaki sipariş iptal edilemez, iade süreci başlatılmalı");
+final class ResolvedState implements TicketState {
+    public String name() { return "RESOLVED"; }
+    public void close(Ticket ticket) { ticket.transitionTo(new ClosedState(), "Kapatıldı"); }
+    public void cancel(Ticket ticket) {
+        throw new IllegalStateException("Çözülmüş talep iptal edilemez, yeniden açma talebi oluşturulmalı");
     }
 }
 ```
 
-Aşağıdaki kod parçası çalıştırıldığında ekran çıktısı ne olur? *(NewState sınıfının pay metodu siparişi PaidState durumuna geçirmektedir.)*
+Aşağıdaki kod parçası çalıştırıldığında ekran çıktısı ne olur? *(OpenState sınıfının assign metodu talebi AssignedState durumuna geçirmektedir.)*
 
 ```java
-Order order = new Order("SIP-1001");
-order.pay();
-order.ship();
+Ticket ticket = new Ticket("DT-1001");
+ticket.assign();
+ticket.resolve();
 try {
-    order.cancel();
+    ticket.cancel();
 } catch (IllegalStateException e) {
     System.out.println(e.getMessage());
 }
-System.out.println(order.getStatus());
+System.out.println(ticket.getStatus());
 ```
 
 - A)
   ```text
-  İptal edildi, ödeme iadesi başlatıldı
+  İptal edildi, müşteriye bilgi verildi
   CANCELLED
   ```
 - B) Kod derlenmez, çünkü **transitionTo** metodu **package-private** tanımlanmıştır.
 - C)
   ```text
-  Kargodaki sipariş iptal edilemez, iade süreci başlatılmalı
-  SHIPPED
+  Çözülmüş talep iptal edilemez, yeniden açma talebi oluşturulmalı
+  RESOLVED
   ```
 - D)
   ```text
-  SHIPPED durumundaki sipariş iptal edilemez
-  SHIPPED
+  RESOLVED durumundaki talep iptal edilemez
+  RESOLVED
   ```
 
 ## Soru 16

@@ -457,7 +457,18 @@ Geliştirmekte olduğunuz LLM tabanlı kodlama asistanını yakında canlı orta
 ## Soru 26
 <!-- topics: AI Concepts -->
 
-25'inci soruda yer alan ana tabloyu tekrardan göz önüne alalım. Yeni senaryoda kullanıcıların komut satırından verdiği karmaşık talimatlara göre çeşitli işletim sistemi komutlarını çalıştıran, gerektiğinde harici API servis noktalarına bağlanıp veri çekebilen otonom bir asistan tasarladığınızı düşünün. Yazılımın sonraki sürümlerinde ise tek bir asistan yerine, her biri farklı uzmanlıklara sahip ve kendi aralarında da haberleşebilen bir dağıtık yapıya gitmeyi planlıyorsunuz. Bu asistanın mevcut durumda dış sistemlerle etkileşime girmesini sağlayan yetenek ve sonraki planlama düşünüldüğünde sistemin temelini şıklarda belirtilen hangi bileşenler oluşturur?
+Yapay zeka alanında kullanılan temel kavramlar, katmanlarına ve işlevlerine göre aşağıdaki tabloda özetlenmektedir.
+
+| | **Reactive** | **Retrieval** | **Orchestration** | **Validation** | **Models** |
+| --- | --- | --- | --- | --- | --- |
+| **Primitives** | Pr *(Prompt)* | Em *(Embeddings)* | | | Lg *(Large LM)* |
+| **Compositions** | Fc *(Function Call)* | Vx *(Vector)* | Rg *(RAG)* | Gr *(Guardrails)* | Mm *(Multi Model)* |
+| **Deployment** | Ag *(Agent)* | Ft *(Fine Tune)* | Fw *(Framework)* | Rt *(Red-Team)* | Sm *(Small LM)* |
+| **Emerging** | Ma *(Multi Agent)* | Sy *(Synthetic)* | | In *(Interpret)* | Th *(Thinking)* |
+
+*Kaynak:* Martin Keen, Master Inventor, IBM
+
+Kullanıcıların komut satırından verdiği karmaşık talimatlara göre çeşitli işletim sistemi komutlarını çalıştıran, gerektiğinde harici API servis noktalarına bağlanıp veri çekebilen otonom bir asistan tasarladığınızı düşünün. Yazılımın sonraki sürümlerinde ise tek bir asistan yerine, her biri farklı uzmanlıklara sahip ve kendi aralarında da haberleşebilen bir dağıtık yapıya gitmeyi planlıyorsunuz. Bu asistanın mevcut durumda dış sistemlerle etkileşime girmesini sağlayan yetenek ve sonraki planlama düşünüldüğünde sistemin temelini tablodaki hangi bileşenler oluşturur?
 
 - A) Em *(Embeddings)* ve Vx *(Vector)*
 - B) Gr *(Guardrails)* ve Rt *(Red-Team)*
@@ -467,7 +478,18 @@ Geliştirmekte olduğunuz LLM tabanlı kodlama asistanını yakında canlı orta
 ## Soru 27
 <!-- topics: AI Concepts -->
 
-25'inci soruda yer alan ana tabloyu tekrardan göz önüne alalım. Yeni senaryonun sahibi bir hukuk bürosu. Büronun binlerce sayfadan oluşan dava dosyalarını ve içtihat metinlerini yapay zeka aracılığıyla sorgulayabilen bir sistem tasarlandığını düşünün. Belgeler çok uzun ve LLM'in bağlam penceresinin *(Context Window)* boyutlarına da sığmıyor. Sorunu çözmek için yazılım geliştirme ekibi; metinleri anlamsal matematiksel temsillere dönüştürüp özel bir veritabanında saklamaya ve kullanıcı soru sorduğunda en alakalı bilgi parçalarını bu veritabanından çekip modele göndermeye karar veriyor.
+Yapay zeka alanında kullanılan temel kavramlar, katmanlarına ve işlevlerine göre aşağıdaki tabloda özetlenmektedir.
+
+| | **Reactive** | **Retrieval** | **Orchestration** | **Validation** | **Models** |
+| --- | --- | --- | --- | --- | --- |
+| **Primitives** | Pr *(Prompt)* | Em *(Embeddings)* | | | Lg *(Large LM)* |
+| **Compositions** | Fc *(Function Call)* | Vx *(Vector)* | Rg *(RAG)* | Gr *(Guardrails)* | Mm *(Multi Model)* |
+| **Deployment** | Ag *(Agent)* | Ft *(Fine Tune)* | Fw *(Framework)* | Rt *(Red-Team)* | Sm *(Small LM)* |
+| **Emerging** | Ma *(Multi Agent)* | Sy *(Synthetic)* | | In *(Interpret)* | Th *(Thinking)* |
+
+*Kaynak:* Martin Keen, Master Inventor, IBM
+
+Senaryonun sahibi bir hukuk bürosu. Büronun binlerce sayfadan oluşan dava dosyalarını ve içtihat metinlerini yapay zeka aracılığıyla sorgulayabilen bir sistem tasarlandığını düşünün. Belgeler çok uzun ve LLM'in bağlam penceresinin *(Context Window)* boyutlarına da sığmıyor. Sorunu çözmek için yazılım geliştirme ekibi; metinleri anlamsal matematiksel temsillere dönüştürüp özel bir veritabanında saklamaya ve kullanıcı soru sorduğunda en alakalı bilgi parçalarını bu veritabanından çekip modele göndermeye karar veriyor.
 
 Bu senaryoda hukuk bürosunun kurmak istediği mimariyi sıfırdan inşa etmek için tablodaki hangi **Retrieval** bileşenlerini sırayla kullanmak gerekir?
 
