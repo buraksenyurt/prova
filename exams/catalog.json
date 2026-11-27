@@ -127,6 +127,26 @@
         "Stream API",
         "Architecture"
       ]
+    },
+    {
+      "id": "java-02",
+      "title": "Tasarım Kalıpları: Senaryolar",
+      "course": "Java",
+      "description": "Strategy, State, Chain of Responsibility, Decorator, Adapter, Facade ve Command kalıplarını ne zaman kullanmalı, ne zaman kullanmamalı sorusu üzerinden ele alan 10 senaryo sorusu. Her sorunun açıklaması diğer şıkların neden yanlış olduğunu da anlatır.",
+      "file": "java/java-exams-02.md",
+      "questions": 10,
+      "level": "advanced",
+      "minutes": 25,
+      "tags": [
+        "Java",
+        "Design Patterns",
+        "Strategy",
+        "State",
+        "Chain of Responsibility",
+        "Decorator",
+        "Adapter",
+        "Command"
+      ]
     }
   ]
 }
